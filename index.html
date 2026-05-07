@@ -3,71 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - ขิม 7 หย่อง (Custom Hz)</title>
+    <title>Thai Tuner PRO - Interactive Khim 7</title>
     <style>
         :root {
             --bg-dark: #3e332d; --bg-red: #a4332d; --bg-cream: #e5d9c5;
             --accent-green: #48c9b0; --accent-blue: #2e86c1; --gold: #f1c40f;
             --white: #ffffff;
         }
-        body { margin: 0; padding: 0; font-family: 'Tahoma', sans-serif; background-color: #1a1a1a; color: var(--white); overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .app-container { width: 100vw; height: 100vh; max-width: 1200px; background: var(--bg-cream); display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
 
+        body {
+            margin: 0; padding: 0; font-family: 'Tahoma', sans-serif;
+            background-color: #1a1a1a; color: var(--white); overflow: hidden;
+            display: flex; justify-content: center; align-items: center; height: 100vh;
+        }
+
+        .app-container {
+            width: 100vw; height: 100vh; max-width: 1200px;
+            background: var(--bg-cream); display: flex; flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); transition: all 0.3s ease;
+        }
+
+        /* Responsive Layout สำหรับ Tablet แนวนอน */
         @media (min-width: 768px) and (orientation: landscape) {
             .app-container { flex-direction: row; height: 85vh; border-radius: 20px; overflow: hidden; }
             .left-panel { flex: 1; border-right: 4px solid var(--bg-red); }
             .right-panel { flex: 1.3; }
         }
 
+        /* ส่วนแสดงผล (ซ้าย) */
         .left-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-        .instrument-section { background: radial-gradient(circle, #f0e6d6 0%, #dcc8ac 100%); padding: 20px; text-align: center; flex: 0.6; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .khim-img { width: 45%; max-width: 180px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2)); }
+        
+        .instrument-section {
+            background: radial-gradient(circle, #f0e6d6 0%, #dcc8ac 100%);
+            padding: 20px; text-align: center; flex: 0.8;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
 
-        .tuner-display { background: linear-gradient(to bottom, var(--accent-green), var(--accent-blue)); padding: 25px; text-align: center; border-top: 5px solid var(--bg-red); flex: 1.4; display: flex; flex-direction: column; justify-content: center; transition: background 0.3s; }
-        .note-name { font-size: 2.2em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        /* SVG รูปขิม */
+        #khim-svg {
+            width: 90%; max-width: 350px; height: auto;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+        }
+        
+        /* สไตล์พื้นฐานของเส้นสายขิม */
+        .khim-string {
+            stroke: #8e44ad; /* สีม่วงเข้มเริ่มต้น */
+            stroke-width: 1.5;
+            transition: stroke 0.2s, stroke-width 0.2s;
+        }
+        
+        /* สไตล์เมื่อเส้นถูกไฮไลท์ (เมื่อกดปุ่ม) */
+        .khim-string.active {
+            stroke: var(--accent-green) !important; /* สีเขียวมิ้นท์สว่าง */
+            stroke-width: 4 !important; /* ทำให้เส้นหนาขึ้น */
+            filter: drop-shadow(0 0 5px rgba(72, 201, 176, 0.8)); /* เพิ่มแสงเรือง */
+        }
+
+        .tuner-display {
+            background: linear-gradient(to bottom, var(--accent-green), var(--accent-blue));
+            padding: 15px; text-align: center; border-top: 5px solid var(--bg-red); flex: 1.2;
+            display: flex; flex-direction: column; justify-content: center; transition: background 0.3s;
+        }
+
+        .note-name { font-size: 2em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         .target-info { font-size: 1.1em; background: rgba(0,0,0,0.2); padding: 2px 15px; border-radius: 10px; margin-top: 5px; display: inline-block; }
-        .current-hz { font-size: 4em; font-weight: bold; font-family: monospace; margin: 10px 0; }
-        .status-badge { background: var(--gold); color: #7b241c; padding: 5px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2em; display: inline-block; margin-bottom: 15px; min-width: 150px; }
+        .current-hz { font-size: 3.5em; font-weight: bold; font-family: monospace; margin: 5px 0; }
+        .status-badge { background: var(--gold); color: #7b241c; padding: 5px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2em; display: inline-block; margin-bottom: 10px; min-width: 150px; }
 
-        .meter-container { width: 100%; height: 60px; position: relative; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
+        /* เข็มวัด */
+        .meter-container { width: 100%; height: 50px; position: relative; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); margin-top: 5px; }
         .center-line { position: absolute; left: 50%; width: 3px; height: 100%; background: var(--white); z-index: 1; }
-        .needle { position: absolute; bottom: 0; left: 50%; width: 5px; height: 100%; background: #ffeb3b; transform: translateX(-50%); transition: left 0.15s ease-out; z-index: 2; }
+        .needle { position: absolute; bottom: 0; left: 50%; width: 5px; height: 100%; background: #ffeb3b; transform: translateX(-50%); transition: left 0.1s cubic-bezier(0.1, 0, 0.1, 1); z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
+        /* ส่วนควบคุม (ขวา) */
         .right-panel { display: flex; flex-direction: column; flex: 1.3; background: var(--bg-red); }
         .bridge-tabs { display: flex; background: var(--bg-dark); padding: 10px; gap: 8px; }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: bold; color: #ccc; }
-        .tab.active { background: var(--bg-red); color: var(--white); }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border-radius: 10px; transition: 0.3s; font-weight: bold; color: #ccc; }
+        .tab.active { background: var(--bg-red); color: var(--white); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
 
-        .note-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)); gap: 15px; overflow-y: auto; align-content: start; flex: 1; }
-        .note-btn { background: rgba(255,255,255,0.15); aspect-ratio: 1/1; transform: rotate(45deg); display: flex; justify-content: center; align-items: center; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; margin: 12px; }
+        .note-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 15px; overflow-y: auto; align-content: start; flex: 1; }
+        
+        /* ปุ่มโน้ต */
+        .note-btn {
+            background: rgba(255,255,255,0.15); aspect-ratio: 1/1; transform: rotate(45deg);
+            display: flex; justify-content: center; align-items: center;
+            border: 2px solid rgba(255,255,255,0.3); cursor: pointer; margin: 12px; transition: 0.2s;
+        }
         .note-btn.active { background: var(--gold); border-color: var(--white); box-shadow: 0 0 20px var(--gold); }
-        .note-btn span { transform: rotate(-45deg); font-weight: bold; font-size: 1.2em; color: white; }
+        .note-btn span { transform: rotate(-45deg); font-weight: bold; color: white; font-size: 1.2em; }
         .note-btn.active span { color: #7b241c; }
 
+        /* หน้าจอเริ่มต้น */
         #start-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #start-btn { padding: 20px 60px; font-size: 1.6em; background: var(--gold); border: none; border-radius: 50px; cursor: pointer; font-weight: bold; color: #7b241c; }
+        #start-btn { padding: 20px 60px; font-size: 1.6em; background: var(--gold); border: none; border-radius: 50px; cursor: pointer; font-weight: bold; color: #7b241c; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div id="start-overlay">
-        <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
-        <p style="color: #aaa; margin-bottom: 30px;">เครื่องมือตั้งสายขิม 7 หย่อง<br>ความแม่นยำสูง ±10 Cents</p>
+        <h1 style="color: var(--gold); margin-bottom: 10px;">Thai Tuner PRO</h1>
+        <p style="color: #aaa; margin-bottom: 30px;">เครื่องมือตั้งสายขิม 7 หย่อง<br>Interactive Highlight ±10 Cents</p>
         <button id="start-btn">เริ่มใช้งาน</button>
     </div>
 
     <div class="left-panel">
         <section class="instrument-section">
-            <img src="https://cdn-icons-png.flaticon.com/512/3233/3233497.png" class="khim-img">
-            <div id="bridge-title" style="color: var(--bg-dark); font-weight: bold; margin-top: 10px;">หย่องซ้าย</div>
+            <svg id="khim-svg" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="50" cy="40" rx="45" ry="30" fill="#a1887f" stroke="#8d6e63" stroke-width="2"/>
+                
+                <rect x="20" y="20" width="3" height="40" fill="#d7ccc8" />
+                <rect x="30" y="20" width="3" height="40" fill="#d7ccc8" />
+                <rect x="40" y="20" width="3" height="40" fill="#d7ccc8" />
+                <rect x="50" y="20" width="3" height="40" fill="#d7ccc8" />
+                <rect x="60" y="20" width="3" height="40" fill="#d7ccc8" />
+                <rect x="70" y="20" width="3" height="40" fill="#d7ccc8" />
+                <rect x="80" y="20" width="3" height="40" fill="#d7ccc8" />
+
+                <line id="string-row-1" class="khim-string" x1="15" y1="58" x2="85" y2="58" />
+                <line id="string-row-2" class="khim-string" x1="15" y1="53" x2="85" y2="53" />
+                <line id="string-row-3" class="khim-string" x1="15" y1="48" x2="85" y2="48" />
+                <line id="string-row-4" class="khim-string" x1="15" y1="43" x2="85" y2="43" />
+                <line id="string-row-5" class="khim-string" x1="15" y1="38" x2="85" y2="38" />
+                <line id="string-row-6" class="khim-string" x1="15" y1="33" x2="85" y2="33" />
+                <line id="string-row-7" class="khim-string" x1="15" y1="28" x2="85" y2="28" />
+            </svg>
+            <div style="color: var(--bg-dark); font-weight: bold; margin-top: 15px; font-size: 1.2em;" id="bridge-title">หย่องกลาง</div>
         </section>
 
         <section class="tuner-display" id="display-bg">
-            <div class="note-name" id="display-note">ซอล</div>
-            <div class="target-info">เป้าหมาย: <span id="target-hz-val">755.7</span> Hz</div>
+            <div class="note-info">
+                <div class="note-name" id="display-note">ซอล ๓</div>
+                <div class="target-info">เป้าหมาย: <span id="target-hz-val">293.7</span> Hz</div>
+            </div>
             <div class="current-hz" id="display-hz">---</div>
-            <div class="status-badge" id="status-text">0.0 Hz</div>
+            <div>
+                <div class="status-badge" id="offset-hz">0.0 Hz</div>
+            </div>
             <div class="meter-container">
                 <div class="center-line"></div>
                 <div class="needle" id="needle"></div>
@@ -77,8 +149,8 @@
 
     <div class="right-panel">
         <div class="bridge-tabs">
-            <div class="tab active" onclick="filterNotes('left')">ซ้าย (นอก)</div>
-            <div class="tab" onclick="filterNotes('middle')">กลาง</div>
+            <div class="tab" onclick="filterNotes('left')">ซ้าย (นอก)</div>
+            <div class="tab active" onclick="filterNotes('middle')">กลาง</div>
             <div class="tab" onclick="filterNotes('right')">ขวา (ใน)</div>
         </div>
         <nav id="note-grid" class="note-grid"></nav>
@@ -86,26 +158,40 @@
 </div>
 
 <script>
-    // --- ส่วนแก้ไขค่าความถี่ (Hz) ---
+    // --- ส่วนข้อมูลโน้ตและค่าความถี่ (Hz) ---
+    // เพิ่ม 'row' เข้ามาเพื่อระบุว่าจะไฮไลท์สายแถวไหน
     const noteData = {
         left: [ 
-            {n:"ซ", hz:755.7}, // ตัวสูงสุด ซ้ายนอก
-            {n:"ฟ", hz:684.4}, 
-            {n:"ม", hz:619.9}, 
-            {n:"ร", hz:554.4}, // ค่าสมมติ รอเติมจริง
-            {n:"ด", hz:493.9}, // ค่าสมมติ รอเติมจริง
-            {n:"ท", hz:440.0}, // ค่าสมมติ รอเติมจริง
-            {n:"ล", hz:392.0}  // ค่าสมมติ รอเติมจริง
+            {n:"ซ", hz:755.7, row: 7}, // แถวบนสุด
+            {n:"ฟ", hz:684.4, row: 6}, 
+            {n:"ม", hz:619.9, row: 5},
+            {n:"ร", hz:554.4, row: 4}, // ค่าสมมติ
+            {n:"ด", hz:493.9, row: 3}, // ค่าสมมติ
+            {n:"ท", hz:440.0, row: 2}, // ค่าสมมติ
+            {n:"ล", hz:392.0, row: 1}  // แถวล่างสุด
         ],
         middle: [ 
-            {n:"ร", hz:440.0}, {n:"ด", hz:392.0}, {n:"ท", hz:349.2}, {n:"ล", hz:329.6}, {n:"ซ", hz:293.7}, {n:"ฟ", hz:261.6}, {n:"ม", hz:246.9} 
+            {n:"ร", hz:440.0, row: 7}, {n:"ด", hz:392.0, row: 6}, {n:"ท", hz:349.2, row: 5}, {n:"ล", hz:329.6, row: 4}, {n:"ซ", hz:293.7, row: 3}, {n:"ฟ", hz:261.6, row: 2}, {n:"ม", hz:246.9, row: 1} 
         ],
         right: [ 
-            {n:"ท", hz:220.0}, {n:"ล", hz:196.0}, {n:"ซ", hz:174.6}, {n:"ฟ", hz:164.8}, {n:"ม", hz:146.8}, {n:"ร", hz:130.8}, {n:"ด", hz:123.5} 
+            {n:"ท", hz:220.0, row: 7}, {n:"ล", hz:196.0, row: 6}, {n:"ซ", hz:174.6, row: 5}, {n:"ฟ", hz:164.8, row: 4}, {n:"ม", hz:146.8, row: 3}, {n:"ร", hz:130.8, row: 2}, {n:"ด", hz:123.5, row: 1} 
         ]
     };
 
-    let audioContext, analyser, targetHz = 755.7;
+    let audioContext, analyser, targetHz = 293.7;
+
+    // ฟังก์ชันในการอัปเดตการแสดงผลเส้นไฮไลท์
+    function highlightString(row) {
+        // ลบไฮไลท์เดิมออกให้หมดก่อน
+        document.querySelectorAll('.khim-string').forEach(str => {
+            str.classList.remove('active');
+        });
+        // ใส่ไฮไลท์ให้เส้นที่ระบุ
+        const activeString = document.getElementById(`string-row-${row}`);
+        if(activeString) {
+            activeString.classList.add('active');
+        }
+    }
 
     function filterNotes(bridge) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -124,6 +210,9 @@
                 targetHz = item.hz;
                 document.getElementById('display-note').innerText = item.n;
                 document.getElementById('target-hz-val').innerText = item.hz.toFixed(1);
+                
+                // --- ส่วนที่เพิ่มใหม่: สั่งไฮไลท์เส้นขิม ---
+                highlightString(item.row);
             };
             grid.appendChild(btn);
         });
@@ -148,22 +237,22 @@
 
         if (pitch !== -1 && pitch < 2000) {
             document.getElementById('display-hz').innerText = pitch.toFixed(1);
+            
             const hzDiff = pitch - targetHz;
             const centsOff = Math.floor(1200 * Math.log2(pitch / targetHz));
-            document.getElementById('status-text').innerText = (hzDiff > 0 ? "+" : "") + hzDiff.toFixed(1) + " Hz";
+            
+            document.getElementById('offset-hz').innerText = (hzDiff > 0 ? "+" : "") + hzDiff.toFixed(1) + " Hz";
 
-            let moveX = centsOff * 3;
+            let moveX = centsOff * 3; 
             if (moveX > 150) moveX = 150; if (moveX < -150) moveX = -150;
             document.getElementById('needle').style.left = `calc(50% + ${moveX}px)`;
 
             // เช็คระยะความแม่นยำที่ ±10 Cents
             if (Math.abs(centsOff) <= 10) {
-                document.getElementById('display-bg').style.background = "#2ecc71";
-                document.getElementById('status-text').innerText = "ตรงเสียง (±10 Cents)";
-                document.getElementById('status-text').style.color = "white";
+                document.getElementById('display-bg').style.background = "#2ecc71"; // สีเขียว
+                document.getElementById('offset-hz').innerText = "ตรงเสียง (±10 Cents)";
             } else {
                 document.getElementById('display-bg').style.background = "linear-gradient(to bottom, var(--accent-green), var(--accent-blue))";
-                document.getElementById('status-text').style.color = "#7b241c";
             }
         }
         requestAnimationFrame(update);
@@ -181,7 +270,7 @@
     }
 
     document.getElementById('start-btn').onclick = startTuner;
-    window.onload = () => filterNotes('left');
+    window.onload = () => filterNotes('middle');
 </script>
 </body>
 </html>
