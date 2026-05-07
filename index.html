@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - Smart Unison Highlight</title>
+    <title>Thai Tuner PRO - Updated Hz Scale</title>
     <style>
         :root {
             --wood-dark: #3e2723; --wood-main: #5d4037; --wood-light: #8d6e63;
@@ -86,30 +86,25 @@
 <div class="app-container">
     <div id="start-overlay">
         <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
-        <p style="color: #aaa;">Smart Unison Highlight Active</p>
+        <p style="color: #aaa;">Data Updated: Custom Hz Scale</p>
         <button id="start-btn">เริ่มใช้งาน</button>
     </div>
 
     <div class="left-panel">
         <section class="instrument-section">
             <svg id="khim-svg" viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg">
-                <!-- Body -->
                 <path d="M30,10 L110,10 Q135,10 130,40 Q125,75 110,77 L30,77 Q15,75 10,40 Q5,10 30,10 Z" fill="var(--wood-dark)"/>
                 <path d="M33,13 L107,13 Q128,13 124,40 Q120,70 107,72 L33,72 Q20,70 16,40 Q12,13 33,13 Z" fill="var(--wood-main)"/>
-                <!-- Bridges -->
                 <rect x="45" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
                 <rect x="70" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
                 <rect x="95" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
-                <!-- Strings Shadow -->
                 <g stroke="#333" stroke-width="0.2" opacity="0.4">
                     <line x1="20" y1="20" x2="120" y2="20"/><line x1="20" y1="27" x2="120" y2="27"/>
                     <line x1="20" y1="34" x2="120" y2="34"/><line x1="20" y1="41" x2="120" y2="41"/>
                     <line x1="20" y1="48" x2="120" y2="48"/><line x1="20" y1="55" x2="120" y2="55"/>
                     <line x1="20" y1="62" x2="120" y2="62"/>
                 </g>
-                <!-- Interactive Highlights -->
                 <g id="highlight-layer">
-                    <!-- Row 7 to 1 -->
                     <line id="h-left-7" x1="25" y1="20" x2="43" y2="20" class="highlight-bar"/><line id="h-mid-7" x1="48" y1="20" x2="68" y2="20" class="highlight-bar"/><line id="h-right-7" x1="73" y1="20" x2="93" y2="20" class="highlight-bar"/>
                     <line id="h-left-6" x1="25" y1="27" x2="43" y2="27" class="highlight-bar"/><line id="h-mid-6" x1="48" y1="27" x2="68" y2="27" class="highlight-bar"/><line id="h-right-6" x1="73" y1="27" x2="93" y2="27" class="highlight-bar"/>
                     <line id="h-left-5" x1="25" y1="34" x2="43" y2="34" class="highlight-bar"/><line id="h-mid-5" x1="48" y1="34" x2="68" y2="34" class="highlight-bar"/><line id="h-right-5" x1="73" y1="34" x2="93" y2="34" class="highlight-bar"/>
@@ -124,8 +119,8 @@
 
         <section class="tuner-display" id="display-bg">
             <div class="note-info">
-                <div class="note-name" id="display-note">ซอล</div>
-                <div class="target-info">เป้าหมาย: <span id="target-hz-val">293.7</span> Hz</div>
+                <div class="note-name" id="display-note">โด</div>
+                <div class="target-info">เป้าหมาย: <span id="target-hz-val">508.5</span> Hz</div>
             </div>
             <div class="current-hz" id="display-hz">---</div>
             <div><div class="status-badge" id="offset-hz">0.0 Hz</div></div>
@@ -144,32 +139,31 @@
 </div>
 
 <script>
+    // อัปเดตข้อมูล Hz ตามที่คุณให้มาล่าสุด
     const noteData = {
         left: [ 
             {n:"ซ", hz:755.7, row:7}, {n:"ฟ", hz:684.4, row:6}, {n:"ม", hz:619.9, row:5},
-            {n:"ร", hz:554.4, row:4}, {n:"ด", hz:493.9, row:3}, {n:"ท", hz:440.0, row:2}, {n:"ล", hz:392.0, row:1} 
+            {n:"ร", hz:561.5, row:4}, {n:"ด", hz:508.5, row:3}, {n:"ท", hz:460.0, row:2}, {n:"ล", hz:417.2, row:1} 
         ],
         middle: [ 
-            {n:"ร", hz:440.0, row:7}, {n:"ด", hz:392.0, row:6}, {n:"ท", hz:349.2, row:5}, {n:"ล", hz:329.6, row:4}, {n:"ซ", hz:293.7, row:3}, {n:"ฟ", hz:261.6, row:2}, {n:"ม", hz:246.9, row:1} 
+            {n:"ด", hz:508.5, row:7}, {n:"ท", hz:460.0, row:6}, {n:"ล", hz:417.2, row:5}, 
+            {n:"ซ", hz:377.8, row:4}, {n:"ฟ", hz:342.2, row:3}, {n:"ม", hz:309.9, row:2}, {n:"ร", hz:280.7, row:1} 
         ],
         right: [ 
-            {n:"ท", hz:220.0, row:7}, {n:"ล", hz:196.0, row:6}, {n:"ซ", hz:174.6, row:5}, {n:"ฟ", hz:164.8, row:4}, {n:"ม", hz:146.8, row:3}, {n:"ร", hz:130.8, row:2}, {n:"ด", hz:123.5, row:1} 
+            {n:"ฟ", hz:342.2, row:7}, {n:"ม", hz:309.9, row:6}, {n:"ร", hz:280.7, row:5}, 
+            {n:"ด", hz:254.2, row:4}, {n:"ท", hz:230.3, row:3}, {n:"ล", hz:208.5, row:2}, {n:"ซ", hz:118.9, row:1} 
         ]
     };
 
-    let audioContext, analyser, targetHz = 293.7, currentBridge = 'middle';
+    let audioContext, analyser, targetHz = 508.5, currentBridge = 'middle';
 
-    // --- Smart Unison Highlight Logic ---
     function highlightUnisonStrings(hz) {
-        // ล้างสีไฮไลท์เก่า
         document.querySelectorAll('.highlight-bar').forEach(str => str.classList.remove('active'));
-
         const bridges = ['left', 'middle', 'right'];
         const prefixMap = { 'left': 'h-left', 'middle': 'h-mid', 'right': 'h-right' };
 
         bridges.forEach(bridgeKey => {
             noteData[bridgeKey].forEach(noteObj => {
-                // ถ้าค่าความถี่ตรงกัน (ต่างกันไม่เกิน 0.1 เพื่อความชัวร์) ให้สว่างขึ้นมา
                 if (Math.abs(noteObj.hz - hz) < 0.1) {
                     const elId = `${prefixMap[bridgeKey]}-${noteObj.row}`;
                     const el = document.getElementById(elId);
@@ -217,7 +211,7 @@
             audioContext.createMediaStreamSource(stream).connect(analyser);
             document.getElementById('start-overlay').style.display = 'none';
             update();
-        } catch (e) { alert("กรุณาอนุญาตไมค์และใช้ HTTPS"); }
+        } catch (e) { alert("กรุณาอนุญาตไมค์และเข้าถึงผ่าน HTTPS"); }
     }
 
     function update() {
