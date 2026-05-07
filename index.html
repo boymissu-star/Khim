@@ -3,32 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner - Interactive Khim</title>
+    <title>Thai Tuner PRO - Interactive Khim 7</title>
     <style>
         :root {
             --wood-dark: #3e2723; --wood-main: #5d4037; --wood-light: #8d6e63;
             --accent-blue: #00f2fe; --bridge-red: #b71c1c; --gold: #f1c40f;
+            --white: #ffffff;
         }
 
         body {
-            margin: 0; background: #1a1a1a; color: white;
-            font-family: 'Tahoma', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh;
+            margin: 0; padding: 0; font-family: 'Tahoma', sans-serif;
+            background-color: #1a1a1a; color: var(--white); overflow: hidden;
+            display: flex; justify-content: center; align-items: center; height: 100vh;
         }
 
-        .container {
-            width: 100%; max-width: 900px; background: #e5d9c5;
-            border-radius: 20px; overflow: hidden; display: flex; flex-direction: column;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); height: 90vh;
+        /* Container หลักที่ปรับตัวตามหน้าจอ Tablet */
+        .app-container {
+            width: 100vw; height: 100vh; max-width: 1200px;
+            background: #e5d9c5; display: flex; flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); transition: all 0.3s ease;
         }
 
-        /* ส่วนแสดงผลขิม */
-        .khim-display {
-            flex: 1.5; background: radial-gradient(circle, #fdf5e6 0%, #d2b48c 100%);
+        /* Responsive: Tablet Landscape */
+        @media (min-width: 768px) and (orientation: landscape) {
+            .app-container { flex-direction: row; height: 85vh; border-radius: 20px; overflow: hidden; }
+            .left-panel { flex: 1; border-right: 4px solid var(--bridge-red); }
+            .right-panel { flex: 1.3; }
+        }
+
+        /* ส่วนซ้าย: จอแสดงผลและรูปขิม */
+        .left-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+        
+        .instrument-section {
+            background: radial-gradient(circle, #fdf5e6 0%, #d2b48c 100%);
+            padding: 20px; text-align: center; flex: 0.8;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            position: relative; padding: 20px;
         }
 
-        #khim-svg { width: 100%; max-width: 600px; height: auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
+        #khim-svg { width: 100%; max-width: 450px; height: auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
 
         /* สไตล์เส้นไฮไลท์ */
         .highlight-bar {
@@ -38,126 +50,135 @@
         }
         .highlight-bar.active { opacity: 1; stroke-width: 5; }
 
-        /* ส่วนควบคุมและตั้งสาย */
-        .controls {
-            flex: 1; background: var(--bridge-red); display: flex; flex-direction: column;
+        .tuner-display {
+            background: linear-gradient(to bottom, #48c9b0, #2e86c1);
+            padding: 20px; text-align: center; border-top: 5px solid var(--bridge-red); flex: 1.2;
+            display: flex; flex-direction: column; justify-content: center; transition: background 0.3s;
         }
 
-        .bridge-selector {
-            display: flex; background: #2d1b18; padding: 5px;
-        }
-        .tab {
-            flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #aaa; font-weight: bold;
-        }
-        .tab.active { color: white; background: var(--bridge-red); border-radius: 10px 10px 0 0; }
+        .note-name { font-size: 2em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .target-info { font-size: 1.1em; background: rgba(0,0,0,0.2); padding: 2px 15px; border-radius: 10px; margin-top: 5px; display: inline-block; }
+        .current-hz { font-size: 3.5em; font-weight: bold; font-family: monospace; margin: 5px 0; }
+        .status-badge { background: var(--gold); color: #7b241c; padding: 5px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2em; display: inline-block; margin-bottom: 10px; min-width: 150px; }
 
-        .note-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; padding: 20px;
-            flex-grow: 1; overflow-y: auto; align-content: center;
-        }
+        /* เข็มวัด */
+        .meter-container { width: 100%; height: 50px; position: relative; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); margin-top: 5px; }
+        .center-line { position: absolute; left: 50%; width: 3px; height: 100%; background: var(--white); z-index: 1; }
+        .needle { position: absolute; bottom: 0; left: 50%; width: 5px; height: 100%; background: #ffeb3b; transform: translateX(-50%); transition: left 0.1s cubic-bezier(0.1, 0, 0.1, 1); z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
+        /* ส่วนขวา: แผงควบคุมปุ่ม */
+        .right-panel { display: flex; flex-direction: column; flex: 1.3; background: var(--bridge-red); }
+        .bridge-tabs { display: flex; background: #2d1b18; padding: 10px; gap: 8px; }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border-radius: 10px; transition: 0.3s; font-weight: bold; color: #ccc; }
+        .tab.active { background: var(--bridge-red); color: var(--white); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+
+        .note-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 15px; overflow-y: auto; align-content: start; flex: 1; }
+        
         .note-btn {
-            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
-            aspect-ratio: 1; display: flex; justify-content: center; align-items: center;
-            border-radius: 12px; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 1.2em;
+            background: rgba(255,255,255,0.15); aspect-ratio: 1/1; transform: rotate(45deg);
+            display: flex; justify-content: center; align-items: center;
+            border: 2px solid rgba(255,255,255,0.3); cursor: pointer; margin: 12px; transition: 0.2s;
         }
-        .note-btn.active { background: var(--gold); color: #3e2723; transform: scale(1.1); box-shadow: 0 0 15px var(--gold); }
+        .note-btn.active { background: var(--gold); border-color: var(--white); box-shadow: 0 0 20px var(--gold); }
+        .note-btn span { transform: rotate(-45deg); font-weight: bold; color: white; font-size: 1.2em; }
+        .note-btn.active span { color: #7b241c; }
 
-        .status-panel {
-            background: #222; padding: 15px; text-align: center; border-top: 2px solid var(--gold);
-        }
+        /* หน้าจอเริ่มต้น */
+        #start-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #start-btn { padding: 20px 60px; font-size: 1.6em; background: var(--gold); border: none; border-radius: 50px; cursor: pointer; font-weight: bold; color: #7b241c; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="khim-display">
-        <svg id="khim-svg" viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg">
-            <!-- ตัวขิม (Body) -->
-            <path d="M30,10 L110,10 Q135,10 130,40 Q125,75 110,77 L30,77 Q15,75 10,40 Q5,10 30,10 Z" fill="var(--wood-dark)"/>
-            <path d="M33,13 L107,13 Q128,13 124,40 Q120,70 107,72 L33,72 Q20,70 16,40 Q12,13 33,13 Z" fill="var(--wood-main)"/>
-            
-            <!-- หย่อง (Bridges) 3 แถว -->
-            <rect x="45" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/> <!-- ซ้าย -->
-            <rect x="70" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/> <!-- กลาง -->
-            <rect x="95" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/> <!-- ขวา -->
-
-            <!-- สายขิม (Background Strings) -->
-            <g stroke="#333" stroke-width="0.2" opacity="0.4">
-                <line x1="20" y1="20" x2="120" y2="20"/> <line x1="20" y1="27" x2="120" y2="27"/>
-                <line x1="20" y1="34" x2="120" y2="34"/> <line x1="20" y1="41" x2="120" y2="41"/>
-                <line x1="20" y1="48" x2="120" y2="48"/> <line x1="20" y1="55" x2="120" y2="55"/>
-                <line x1="20" y1="62" x2="120" y2="62"/>
-            </g>
-
-            <!-- เลเยอร์ไฮไลท์ (สีทับเส้น) -->
-            <g id="highlight-layer">
-                <!-- แถว 1-7: ฝั่งซ้าย (Left), กลาง (Mid), ขวา (Right) -->
-                <!-- แถว 7 (บนสุด) -->
-                <line id="h-left-7" x1="25" y1="20" x2="43" y2="20" class="highlight-bar"/>
-                <line id="h-mid-7" x1="48" y1="20" x2="68" y2="20" class="highlight-bar"/>
-                <line id="h-right-7" x1="73" y1="20" x2="93" y2="20" class="highlight-bar"/>
-                <!-- แถว 6 -->
-                <line id="h-left-6" x1="25" y1="27" x2="43" y2="27" class="highlight-bar"/>
-                <line id="h-mid-6" x1="48" y1="27" x2="68" y2="27" class="highlight-bar"/>
-                <line id="h-right-6" x1="73" y1="27" x2="93" y2="27" class="highlight-bar"/>
-                <!-- แถว 5 -->
-                <line id="h-left-5" x1="25" y1="34" x2="43" y2="34" class="highlight-bar"/>
-                <line id="h-mid-5" x1="48" y1="34" x2="68" y2="34" class="highlight-bar"/>
-                <line id="h-right-5" x1="73" y1="34" x2="93" y2="34" class="highlight-bar"/>
-                <!-- แถว 4 -->
-                <line id="h-left-4" x1="25" y1="41" x2="43" y2="41" class="highlight-bar"/>
-                <line id="h-mid-4" x1="48" y1="41" x2="68" y2="41" class="highlight-bar"/>
-                <line id="h-right-4" x1="73" y1="41" x2="93" y2="41" class="highlight-bar"/>
-                <!-- แถว 3 -->
-                <line id="h-left-3" x1="25" y1="48" x2="43" y2="48" class="highlight-bar"/>
-                <line id="h-mid-3" x1="48" y1="48" x2="68" y2="48" class="highlight-bar"/>
-                <line id="h-right-3" x1="73" y1="48" x2="93" y2="48" class="highlight-bar"/>
-                <!-- แถว 2 -->
-                <line id="h-left-2" x1="25" y1="55" x2="43" y2="55" class="highlight-bar"/>
-                <line id="h-mid-2" x1="48" y1="55" x2="68" y2="55" class="highlight-bar"/>
-                <line id="h-right-2" x1="73" y1="55" x2="93" y2="55" class="highlight-bar"/>
-                <!-- แถว 1 (ล่างสุด) -->
-                <line id="h-left-1" x1="25" y1="62" x2="43" y2="62" class="highlight-bar"/>
-                <line id="h-mid-1" x1="48" y1="62" x2="68" y2="62" class="highlight-bar"/>
-                <line id="h-right-1" x1="73" y1="62" x2="93" y2="62" class="highlight-bar"/>
-            </g>
-        </svg>
-        <h3 id="display-text" style="color: var(--wood-dark); margin-top: 10px;">เลือกโน้ตที่ต้องการตั้งสาย</h3>
+<div class="app-container">
+    <div id="start-overlay">
+        <h1 style="color: var(--gold); margin-bottom: 10px;">Thai Tuner PRO</h1>
+        <p style="color: #aaa; margin-bottom: 30px;">เครื่องมือตั้งสายขิม 7 หย่อง<br>Interactive Highlight ±10 Cents</p>
+        <button id="start-btn">เริ่มใช้งาน</button>
     </div>
 
-    <div class="controls">
-        <div class="bridge-selector">
-            <div class="tab" onclick="switchBridge('left')">หย่องซ้าย</div>
-            <div class="tab active" onclick="switchBridge('middle')">หย่องกลาง</div>
-            <div class="tab" onclick="switchBridge('right')">หย่องขวา</div>
+    <div class="left-panel">
+        <section class="instrument-section">
+            <svg id="khim-svg" viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg">
+                <path d="M30,10 L110,10 Q135,10 130,40 Q125,75 110,77 L30,77 Q15,75 10,40 Q5,10 30,10 Z" fill="var(--wood-dark)"/>
+                <path d="M33,13 L107,13 Q128,13 124,40 Q120,70 107,72 L33,72 Q20,70 16,40 Q12,13 33,13 Z" fill="var(--wood-main)"/>
+                <rect x="45" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
+                <rect x="70" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
+                <rect x="95" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
+                <g stroke="#333" stroke-width="0.2" opacity="0.4">
+                    <line x1="20" y1="20" x2="120" y2="20"/><line x1="20" y1="27" x2="120" y2="27"/>
+                    <line x1="20" y1="34" x2="120" y2="34"/><line x1="20" y1="41" x2="120" y2="41"/>
+                    <line x1="20" y1="48" x2="120" y2="48"/><line x1="20" y1="55" x2="120" y2="55"/>
+                    <line x1="20" y1="62" x2="120" y2="62"/>
+                </g>
+                <g id="highlight-layer">
+                    <line id="h-left-7" x1="25" y1="20" x2="43" y2="20" class="highlight-bar"/><line id="h-mid-7" x1="48" y1="20" x2="68" y2="20" class="highlight-bar"/><line id="h-right-7" x1="73" y1="20" x2="93" y2="20" class="highlight-bar"/>
+                    <line id="h-left-6" x1="25" y1="27" x2="43" y2="27" class="highlight-bar"/><line id="h-mid-6" x1="48" y1="27" x2="68" y2="27" class="highlight-bar"/><line id="h-right-6" x1="73" y1="27" x2="93" y2="27" class="highlight-bar"/>
+                    <line id="h-left-5" x1="25" y1="34" x2="43" y2="34" class="highlight-bar"/><line id="h-mid-5" x1="48" y1="34" x2="68" y2="34" class="highlight-bar"/><line id="h-right-5" x1="73" y1="34" x2="93" y2="34" class="highlight-bar"/>
+                    <line id="h-left-4" x1="25" y1="41" x2="43" y2="41" class="highlight-bar"/><line id="h-mid-4" x1="48" y1="41" x2="68" y2="41" class="highlight-bar"/><line id="h-right-4" x1="73" y1="41" x2="93" y2="41" class="highlight-bar"/>
+                    <line id="h-left-3" x1="25" y1="48" x2="43" y2="48" class="highlight-bar"/><line id="h-mid-3" x1="48" y1="48" x2="68" y2="48" class="highlight-bar"/><line id="h-right-3" x1="73" y1="48" x2="93" y2="48" class="highlight-bar"/>
+                    <line id="h-left-2" x1="25" y1="55" x2="43" y2="55" class="highlight-bar"/><line id="h-mid-2" x1="48" y1="55" x2="68" y2="55" class="highlight-bar"/><line id="h-right-2" x1="73" y1="55" x2="93" y2="55" class="highlight-bar"/>
+                    <line id="h-left-1" x1="25" y1="62" x2="43" y2="62" class="highlight-bar"/><line id="h-mid-1" x1="48" y1="62" x2="68" y2="62" class="highlight-bar"/><line id="h-right-1" x1="73" y1="62" x2="93" y2="62" class="highlight-bar"/>
+                </g>
+            </svg>
+            <div style="color: var(--wood-dark); font-weight: bold; margin-top: 15px; font-size: 1.2em;" id="bridge-title">หย่องกลาง</div>
+        </section>
+
+        <section class="tuner-display" id="display-bg">
+            <div class="note-info">
+                <div class="note-name" id="display-note">ซอล</div>
+                <div class="target-info">เป้าหมาย: <span id="target-hz-val">293.7</span> Hz</div>
+            </div>
+            <div class="current-hz" id="display-hz">---</div>
+            <div><div class="status-badge" id="offset-hz">0.0 Hz</div></div>
+            <div class="meter-container"><div class="center-line"></div><div class="needle" id="needle"></div></div>
+        </section>
+    </div>
+
+    <div class="right-panel">
+        <div class="bridge-tabs">
+            <div class="tab" onclick="switchBridge('left')">ซ้าย (นอก)</div>
+            <div class="tab active" onclick="switchBridge('middle')">กลาง</div>
+            <div class="tab" onclick="switchBridge('right')">ขวา (ใน)</div>
         </div>
-        <div id="note-grid" class="note-grid"></div>
-        <div class="status-panel">
-            <span id="note-name-display" style="font-size: 1.5em; font-weight: bold; color: var(--gold);">---</span>
-        </div>
+        <nav id="note-grid" class="note-grid"></nav>
     </div>
 </div>
 
 <script>
+    // --- ส่วนข้อมูลโน้ตและค่าความถี่ (Hz) เรียงจากแถว 7-1 (บนลงล่าง) ---
     const noteData = {
-        left: [
-            {n:"ซ", row:7}, {n:"ฟ", row:6}, {n:"ม", row:5}, {n:"ร", row:4}, {n:"ด", row:3}, {n:"ท", row:2}, {n:"ล", row:1}
+        left: [ 
+            {n:"ซ", hz:755.7, row:7}, // ตัวสูงสุด ซ้ายนอก ตามที่คุณบอก
+            {n:"ฟ", hz:684.4, row:6}, 
+            {n:"ม", hz:619.9, row:5},
+            {n:"ร", hz:554.4, row:4}, // ค่าสมมติ
+            {n:"ด", hz:493.9, row:3}, // ค่าสมมติ
+            {n:"ท", hz:440.0, row:2}, // ค่าสมมติ
+            {n:"ล", hz:392.0, row:1}  // ค่าสมมติ
         ],
-        middle: [
-            {n:"ร", row:7}, {n:"ด", row:6}, {n:"ท", row:5}, {n:"ล", row:4}, {n:"ซ", row:3}, {n:"ฟ", row:2}, {n:"ม", row:1}
+        middle: [ 
+            {n:"ร", hz:440.0, row:7}, {n:"ด", hz:392.0, row:6}, {n:"ท", hz:349.2, row:5}, {n:"ล", hz:329.6, row:4}, {n:"ซ", hz:293.7, row:3}, {n:"ฟ", hz:261.6, row:2}, {n:"ม", hz:246.9, row:1} 
         ],
-        right: [
-            {n:"ท", row:7}, {n:"ล", row:6}, {n:"ซ", row:5}, {n:"ฟ", row:4}, {n:"ม", row:3}, {n:"ร", row:2}, {n:"ด", row:1}
+        right: [ 
+            {n:"ท", hz:220.0, row:7}, {n:"ล", hz:196.0, row:6}, {n:"ซ", hz:174.6, row:5}, {n:"ฟ", hz:164.8, row:4}, {n:"ม", hz:146.8, row:3}, {n:"ร", hz:130.8, row:2}, {n:"ด", hz:123.5, row:1} 
         ]
     };
 
-    let currentBridge = 'middle';
+    let audioContext, analyser, targetHz = 293.7, currentBridge = 'middle';
+
+    function highlightString(row) {
+        document.querySelectorAll('.highlight-bar').forEach(str => str.classList.remove('active'));
+        const prefixMap = { 'left': 'h-left', 'middle': 'h-mid', 'right': 'h-right' };
+        const activeString = document.getElementById(`${prefixMap[currentBridge]}-${row}`);
+        if(activeString) activeString.classList.add('active');
+    }
 
     function switchBridge(bridge) {
         currentBridge = bridge;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+        if(event) event.currentTarget.classList.add('active');
+        document.getElementById('bridge-title').innerText = "กำลังตั้งสาย: " + (bridge==='left'?'หย่องซ้าย':bridge==='middle'?'หย่องกลาง':'หย่องขวา');
         renderNotes();
     }
 
@@ -167,38 +188,68 @@
         noteData[currentBridge].forEach(item => {
             const btn = document.createElement('div');
             btn.className = 'note-btn';
-            btn.innerText = item.n;
+            btn.innerHTML = `<span>${item.n}</span>`;
             btn.onclick = () => {
                 document.querySelectorAll('.note-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                
-                // อัปเดตการแสดงผลข้อความ
-                document.getElementById('note-name-display').innerText = `โน้ต: ${item.n} (${currentBridge})`;
-                
-                // ไฮไลท์เส้นขิม
-                activateHighlight(currentBridge, item.row);
+                targetHz = item.hz;
+                document.getElementById('display-note').innerText = item.n;
+                document.getElementById('target-hz-val').innerText = item.hz.toFixed(1);
+                highlightString(item.row);
             };
             grid.appendChild(btn);
         });
     }
 
-    function activateHighlight(bridge, row) {
-        // ลบไฮไลท์เก่า
-        document.querySelectorAll('.highlight-bar').forEach(el => el.classList.remove('active'));
-        
-        // แมปชื่อ bridge เป็น prefix ของ ID
-        const prefixMap = { 'left': 'h-left', 'middle': 'h-mid', 'right': 'h-right' };
-        const targetId = `${prefixMap[bridge]}-${row}`;
-        
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-            targetElement.classList.add('active');
-        }
+    async function startTuner() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            audioContext.createMediaStreamSource(stream).connect(analyser);
+            document.getElementById('start-overlay').style.display = 'none';
+            update();
+        } catch (e) { alert("กรุณาอนุญาตไมค์และใช้ HTTPS"); }
     }
 
-    // เริ่มต้น
-    window.onload = renderNotes;
-</script>
+    function update() {
+        const buffer = new Float32Array(2048);
+        analyser.getFloatTimeDomainData(buffer);
+        const pitch = autoCorrelate(buffer, audioContext.sampleRate);
+        if (pitch !== -1 && pitch < 2000) {
+            document.getElementById('display-hz').innerText = pitch.toFixed(1);
+            const hzDiff = pitch - targetHz;
+            const centsOff = Math.floor(1200 * Math.log2(pitch / targetHz));
+            document.getElementById('offset-hz').innerText = (hzDiff > 0 ? "+" : "") + hzDiff.toFixed(1) + " Hz";
+            let moveX = centsOff * 3; 
+            if (moveX > 150) moveX = 150; if (moveX < -150) moveX = -150;
+            document.getElementById('needle').style.left = `calc(50% + ${moveX}px)`;
+            
+            // เกณฑ์ ±10 Cents สำหรับไฟเขียว
+            if (Math.abs(centsOff) <= 10) {
+                document.getElementById('display-bg').style.background = "#2ecc71";
+                document.getElementById('offset-hz').innerText = "ตรงเสียง (±10 Cents)";
+            } else {
+                document.getElementById('display-bg').style.background = "linear-gradient(to bottom, #48c9b0, #2e86c1)";
+            }
+        }
+        requestAnimationFrame(update);
+    }
 
+    function autoCorrelate(buf, sr) {
+        let rms = 0; for (let i=0; i<buf.length; i++) rms += buf[i]*buf[i];
+        if (Math.sqrt(rms/buf.length)<0.01) return -1;
+        let c = new Array(buf.length).fill(0);
+        for (let i=0; i<buf.length; i++) for (let j=0; j<buf.length-i; j++) c[i] += buf[j]*buf[j+i];
+        let d=0; while (c[d]>c[d+1]) d++;
+        let maxval=-1, maxpos=-1;
+        for (let i=d; i<buf.length; i++) if (c[i]>maxval) { maxval=c[i]; maxpos=i; }
+        return sr/maxpos;
+    }
+
+    document.getElementById('start-btn').onclick = startTuner;
+    window.onload = () => switchBridge('middle');
+</script>
 </body>
 </html>
