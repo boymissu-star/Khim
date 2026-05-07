@@ -165,6 +165,166 @@
         }
 
         async function startTuner() {
+            console.log("กำลังเตรียมการทำงาน...");
+            
+            // 1. ตรวจสอบว่ามี Library Pitchy ไหม
+            if (typeof Pitchy === 'undefined') {
+                alert("ไม่สามารถโหลดระบบวิเคราะห์เสียงได้ (เช็คการเชื่อมต่ออินเทอร์เน็ต)");
+                return;
+            }
+
+            try {
+                // 2. ขอสิทธิ์ไมโครโฟน
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log("ได้รับสิทธิ์การใช้งานไมโครโฟนแล้ว");
+
+                // 3. เริ่มระบบเสียง
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                source.connect(analyser);
+
+                // ซ่อนหน้าต่างเริ่มต้นเมื่อพร้อมใช้งาน
+                document.getElementById('start-overlay').style.display = 'none';
+                updatePitch();
+                
+            } catch (err) {
+                // แจ้งเตือนข้อผิดพลาดเกี่ยวกับการเข้าไมค์
+                console.error("เข้าถึงไมค์ไม่ได้:", err);
+                alert("ไม่สามารถเข้าถึงไมค์ได้เพราะ: \n" + err.name + " - " + err.message + "\n\n(แนะนำ: หากเปิดจาก Line/Facebook ให้กดเปิดด้วย Chrome หรือ Safari แทนครับ)");
+            }
+        }
+
+        function updatePitch() {
+            const buffer = new Float32Array(analyser.fftSize);
+            analyser.getFloatTimeDomainData(buffer);
+            
+            // คำนวณหาความถี่จากเสียงไมค์
+            const [pitch, clarity] = Pitchy.findPitch(buffer, audioContext.sampleRate);
+
+            // แสดงผลเมื่อตรวจจับเสียงเดี่ยวที่ชัดเจนและดังพอ
+            if (clarity > 0.8 && pitch > 50) {
+                const currentHz = pitch.toFixed(1);
+                const diff = (pitch - targetHz).toFixed(1);
+                
+                displayHz.innerText = `${currentHz} Hz`;
+                offsetLabel.innerText = `${diff > 0 ? '+' : ''}${diff} Hz`;
+
+                // คำนวณตำแหน่งเข็มบนสเกล +- 15 Hz
+                let moveX = (diff * 10); 
+                if (moveX > 150) moveX = 150;
+                if (moveX < -150) moveX = -150;
+
+                needle.style.left = `calc(50% + ${moveX}px)`;
+                
+                // เปลี่ยนสีเมื่อตั้งตรง (ห่างไม่เกิน 0.5 Hz)
+                if (Math.abs(diff) < 0.5) {
+                    offsetLabel.style.background = "#2ecc71"; // สีเขียว
+                } else {
+                    offsetLabel.style.background = "#f1c40f"; // สีทอง
+                }
+            }
+
+            requestAnimationFrame(updatePitch);
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            startTuner();
+        });
+    </script>
+</body>
+</html>                linear-gradient(90deg, white 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
+            background-size: 20% 40px, 4% 20px; background-repeat: repeat-x; background-position: bottom;
+        }
+
+        .center-mark { position: absolute; top: 0; left: 50%; width: 2px; height: 100%; background: rgba(255,255,255,0.8); z-index: 1; }
+
+        .needle {
+            position: absolute; bottom: 0; left: 50%; width: 5px; height: 60px;
+            background: #ffeb3b; transform: translateX(-50%);
+            border-radius: 5px 5px 0 0; box-shadow: 0 0 15px rgba(255,235,59,1);
+            transition: left 0.1s ease-out; z-index: 2;
+        }
+
+        /* ปุ่มเลือกโน้ตด้านล่าง */
+        .note-selector { background-color: var(--bg-red); padding: 40px 10px; display: flex; justify-content: space-around; }
+
+        .note-btn {
+            width: 65px; height: 65px; background: rgba(255,255,255,0.15);
+            transform: rotate(45deg); display: flex; justify-content: center; align-items: center;
+            border: 2px solid rgba(255,255,255,0.4); cursor: pointer; transition: 0.2s;
+        }
+
+        .note-btn.active { background: rgba(255,255,255,0.4); border-color: white; box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+        .note-btn span { transform: rotate(-45deg); font-size: 1em; font-weight: bold; color: white; }
+
+        /* หน้าจอเริ่มต้น */
+        #start-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;
+        }
+        #start-btn {
+            padding: 18px 50px; font-size: 1.3em; background: var(--gold);
+            border: none; border-radius: 40px; cursor: pointer; font-weight: bold; color: #7b241c;
+            box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="start-overlay">
+            <h2 style="color: var(--gold);">เครื่องมือตั้งสายขิม</h2>
+            <p style="color: #ccc; margin-bottom: 30px;">กรุณากดปุ่มด้านล่าง<br>และอนุญาตให้เข้าถึงไมโครโฟน</p>
+            <button id="start-btn">เริ่มใช้งาน</button>
+        </div>
+
+        <section class="instrument-section">
+            <img src="https://cdn-icons-png.flaticon.com/512/3233/3233497.png" alt="Khim" class="khim-placeholder">
+            <div class="instrument-label">ขิม</div>
+        </section>
+
+        <section class="tuner-display">
+            <div class="note-name" id="display-note">ซอล ๓</div>
+            <div class="frequency" id="display-hz">0.0 Hz</div>
+            <div class="offset-label" id="offset-hz">0 Hz</div>
+            
+            <div class="meter-container">
+                <div class="center-mark"></div>
+                <div class="meter-scale"></div>
+                <div class="needle" id="needle"></div>
+            </div>
+        </section>
+
+        <nav class="note-selector">
+            <div class="note-btn active" onclick="setTarget(188.9, 'ซอล ๓')"><span>ซอล ๓</span></div>
+            <div class="note-btn" onclick="setTarget(212.5, 'ลา ๒')"><span>ลา ๒</span></div>
+            <div class="note-btn" onclick="setTarget(239.0, 'ที ๒')"><span>ที ๒</span></div>
+            <div class="note-btn" onclick="setTarget(268.6, 'โด')"><span>โด</span></div>
+        </nav>
+    </div>
+
+    <script>
+        let audioContext;
+        let analyser;
+        let targetHz = 188.9;
+        
+        const needle = document.getElementById('needle');
+        const displayHz = document.getElementById('display-hz');
+        const offsetLabel = document.getElementById('offset-hz');
+
+        function setTarget(hz, name) {
+            targetHz = hz;
+            document.getElementById('display-note').innerText = name;
+            document.querySelectorAll('.note-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        async function startTuner() {
             // ตรวจสอบว่า Pitchy พร้อมทำงานไหม
             if (typeof Pitchy === 'undefined') {
                 alert("เกิดข้อผิดพลาด: ไม่สามารถโหลดระบบประมวลผลเสียงได้ กรุณาตรวจสอบอินเทอร์เน็ต");
