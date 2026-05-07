@@ -71,4 +71,164 @@
 
         /* ส่วนแสดงผล Tuner */
         .tuner-display {
-            background: linear-gradient(to bottom
+            background: linear-gradient(to bottom, var(--accent-green), var(--accent-blue));
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+        }
+
+        .note-name { 
+            font-size: 1.8em; 
+            margin-bottom: 5px; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .frequency { 
+            font-size: 2.5em; 
+            font-weight: bold; 
+            margin-bottom: 5px;
+        }
+        
+        .offset-label {
+            background: var(--gold);
+            color: #7b241c;
+            padding: 4px 25px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
+        /* หน้าปัดไม้วัด */
+        .meter-container {
+            width: 100%;
+            height: 80px;
+            position: relative;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .meter-scale {
+            width: 100%;
+            height: 100%;
+            /* สร้างขีดสเกล */
+            background-image: 
+                linear-gradient(90deg, white 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
+            background-size: 20% 40px, 4% 20px;
+            background-repeat: repeat-x;
+            background-position: bottom;
+        }
+
+        .center-mark {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 1;
+        }
+
+        .needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 5px;
+            height: 60px;
+            background: #ffeb3b;
+            transform: translateX(-50%);
+            border-radius: 5px 5px 0 0;
+            box-shadow: 0 0 15px rgba(255,235,59,1);
+            transition: left 0.15s ease-out;
+            z-index: 2;
+        }
+
+        /* ปุ่มเลือกโน้ตด้านล่าง */
+        .note-selector {
+            background-color: var(--bg-red);
+            padding: 40px 10px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .note-btn {
+            width: 65px;
+            height: 65px;
+            background: rgba(255,255,255,0.15);
+            transform: rotate(45deg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid rgba(255,255,255,0.4);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .note-btn.active {
+            background: rgba(255,255,255,0.4);
+            border-color: white;
+            box-shadow: 0 0 20px rgba(255,255,255,0.6);
+        }
+
+        .note-btn span {
+            transform: rotate(-45deg);
+            font-size: 1em;
+            font-weight: bold;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <section class="instrument-section">
+            <img src="https://cdn-icons-png.flaticon.com/512/3233/3233497.png" alt="Khim" class="khim-placeholder">
+            <div class="instrument-label">ขิม</div>
+        </section>
+
+        <section class="tuner-display">
+            <div class="note-name" id="display-note">ซอล ๓</div>
+            <div class="frequency" id="display-hz">188.9 Hz</div>
+            <div class="offset-label" id="offset-hz">0 Hz</div>
+            
+            <div class="meter-container">
+                <div class="center-mark"></div>
+                <div class="meter-scale"></div>
+                <div class="needle" id="needle"></div>
+            </div>
+        </section>
+
+        <nav class="note-selector">
+            <div class="note-btn active" onclick="selectNote('ซอล ๓', 188.9)"><span>ซอล ๓</span></div>
+            <div class="note-btn" onclick="selectNote('ลา ๒', 212.5)"><span>ลา ๒</span></div>
+            <div class="note-btn" onclick="selectNote('ที ๒', 239.0)"><span>ที ๒</span></div>
+            <div class="note-btn" onclick="selectNote('โด', 268.6)"><span>โด</span></div>
+        </nav>
+    </div>
+
+    <script>
+        function selectNote(name, hz) {
+            // อัปเดตสถานะปุ่ม
+            const buttons = document.querySelectorAll('.note-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // อัปเดตข้อความหน้าจอ
+            document.getElementById('display-note').innerText = name;
+            document.getElementById('display-hz').innerText = hz + " Hz";
+        }
+
+        // จำลองการขยับของเข็ม (เมื่อเชื่อมไมค์จริง จะใช้ค่าความต่างจากไมค์)
+        setInterval(() => {
+            const needle = document.getElementById('needle');
+            const randomOffset = (Math.random() * 20) - 10; // สุ่มให้แกว่งเบาๆ
+            needle.style.left = `calc(50% + ${randomOffset}px)`;
+        }, 300);
+    </script>
+</body>
+</html>
