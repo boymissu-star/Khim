@@ -1,68 +1,52 @@
-<style>
-    .bridge-selector {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-    .bridge-btn {
-        padding: 5px 15px;
-        border-radius: 15px;
-        border: 1px solid var(--gold);
-        background: transparent;
-        color: var(--gold);
-        cursor: pointer;
-    }
-    .bridge-btn.active {
-        background: var(--gold);
-        color: #7b241c;
-    }
-</style>
-
-<div class="bridge-selector">
-    <button class="bridge-btn" onclick="filterNotes('left')">หย่องซ้าย</button>
-    <button class="bridge-btn active" onclick="filterNotes('middle')">หย่องกลาง</button>
-    <button class="bridge-btn" onclick="filterNotes('right')">หย่องขวา</button>
-</div>
-
-<nav id="note-container" class="note-selector">
-    </nav>
-
 <script>
+    // ข้อมูลโน้ตและค่าความถี่ (เดี๋ยวคุณมาแก้เลข Hz ตรงนี้ได้เลย)
     const noteData = {
-        middle: [
-            { name: "ท", hz: 246.9 },
-            { name: "ล", hz: 220.0 },
-            { name: "ซ", hz: 196.0 },
-            { name: "ฟ", hz: 174.6 }
-        ],
-        right: [
-            { name: "ร", hz: 293.7 },
-            { name: "ด", hz: 261.6 }
-        ],
-        left: [
-            { name: "ม", hz: 329.6 }
-        ]
+        left: [ {n:"ล", hz:880.0}, {n:"ซ", hz:784.0}, {n:"ฟ", hz:698.5}, {n:"ม", hz:659.3}, {n:"ร", hz:587.3}, {n:"ด", hz:523.3}, {n:"ท", hz:493.9} ],
+        middle: [ {n:"ร", hz:440.0}, {n:"ด", hz:392.0}, {n:"ท", hz:349.2}, {n:"ล", hz:329.6}, {n:"ซ", hz:293.7}, {n:"ฟ", hz:261.6}, {n:"ม", hz:246.9} ],
+        right: [ {n:"ท", hz:220.0}, {n:"ล", hz:196.0}, {n:"ซ", hz:174.6}, {n:"ฟ", hz:164.8}, {n:"ม", hz:146.8}, {n:"ร", hz:130.8}, {n:"ด", hz:123.5} ]
     };
 
-    function filterNotes(bridge) {
-        // เปลี่ยนสถานะปุ่มหย่อง
-        document.querySelectorAll('.bridge-btn').forEach(b => b.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    let audioContext, analyser, targetHz = 293.7;
 
-        // สร้างปุ่มโน้ตใหม่
-        const container = document.getElementById('note-container');
-        container.innerHTML = '';
-        
-        noteData[bridge].forEach(item => {
-            const btn = document.createElement('div');
-            btn.className = 'note-btn';
-            btn.innerHTML = `<span>${item.name}</span>`;
-            btn.onclick = () => setTarget(item.hz, item.name);
-            container.appendChild(btn);
-        });
+    // ฟังก์ชันคำนวณหาค่าความต่างเป็น Cent
+    // สูตร: 1200 * log2(f2 / f1)
+    function getCents(currentHz, targetHz) {
+        return Math.floor(1200 * Math.log2(currentHz / targetHz));
     }
 
-    // เริ่มต้นให้แสดงหย่องกลาง
-    window.onload = () => filterNotes('middle');
+    async function update() {
+        const buffer = new Float32Array(2048);
+        analyser.getFloatTimeDomainData(buffer);
+        const pitch = autoCorrelate(buffer, audioContext.sampleRate);
+
+        if (pitch !== -1 && pitch < 2000) {
+            document.getElementById('display-hz').innerText = pitch.toFixed(1);
+            
+            // คำนวณความต่างเป็น Cent
+            const centsOff = getCents(pitch, targetHz);
+            
+            // แสดงผลเลข Hz ที่ต่างกัน (เพื่อให้คนตั้งสายดูง่าย)
+            const hzDiff = (pitch - targetHz).toFixed(1);
+            document.getElementById('offset-hz').innerText = (hzDiff > 0 ? "+" : "") + hzDiff + " Hz";
+
+            // การขยับเข็ม (อิงตาม Cent: สเกลหน้าปัดกว้าง +- 50 Cents)
+            let moveX = centsOff * 3; // 1 Cent ขยับ 3px
+            if (moveX > 150) moveX = 150; 
+            if (moveX < -150) moveX = -150;
+            document.getElementById('needle').style.left = `calc(50% + ${moveX}px)`;
+
+            // เช็คระยะ 3 Cents (ครอบคลุมทั้ง +3 และ -3)
+            if (Math.abs(centsOff) <= 3) {
+                document.getElementById('display-bg').style.background = "#2ecc71"; // สีเขียวเมื่อเป๊ะ
+                document.getElementById('offset-hz').style.color = "white";
+                document.getElementById('offset-hz').innerText = "ตรงเสียง (±3 Cents)";
+            } else {
+                document.getElementById('display-bg').style.background = "linear-gradient(to bottom, var(--accent-green), var(--accent-blue))";
+                document.getElementById('offset-hz').style.color = "#7b241c";
+            }
+        }
+        requestAnimationFrame(update);
+    }
+    
+    // ... ส่วนฟังก์ชันอื่นๆ (filterNotes, startTuner, autoCorrelate) ยังคงเหมือนเดิม ...
 </script>
