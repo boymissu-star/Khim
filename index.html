@@ -1,184 +1,68 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner - ขิม (Full DSP Version)</title>
-    <style>
-        :root {
-            --bg-dark: #3e332d; --bg-red: #a4332d; --bg-cream: #e5d9c5;
-            --accent-green: #48c9b0; --accent-blue: #2e86c1; --gold: #f1c40f;
-        }
-        body { margin: 0; padding: 0; font-family: 'Tahoma', sans-serif; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; overflow: hidden; }
-        .app-container { width: 100%; max-width: 400px; height: 100vh; background: var(--bg-cream); position: relative; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .instrument-section { background: radial-gradient(circle, #f0e6d6 0%, #dcc8ac 100%); padding: 40px 20px; text-align: center; flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .khim-placeholder { width: 90%; max-width: 300px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3)); }
-        .instrument-label { background: white; color: var(--bg-dark); padding: 8px 50px; border-radius: 25px; display: inline-block; margin-top: 25px; font-weight: bold; font-size: 1.2em; border: 2px solid #bdc3c7; }
+<style>
+    .bridge-selector {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .bridge-btn {
+        padding: 5px 15px;
+        border-radius: 15px;
+        border: 1px solid var(--gold);
+        background: transparent;
+        color: var(--gold);
+        cursor: pointer;
+    }
+    .bridge-btn.active {
+        background: var(--gold);
+        color: #7b241c;
+    }
+</style>
+
+<div class="bridge-selector">
+    <button class="bridge-btn" onclick="filterNotes('left')">หย่องซ้าย</button>
+    <button class="bridge-btn active" onclick="filterNotes('middle')">หย่องกลาง</button>
+    <button class="bridge-btn" onclick="filterNotes('right')">หย่องขวา</button>
+</div>
+
+<nav id="note-container" class="note-selector">
+    </nav>
+
+<script>
+    const noteData = {
+        middle: [
+            { name: "ท", hz: 246.9 },
+            { name: "ล", hz: 220.0 },
+            { name: "ซ", hz: 196.0 },
+            { name: "ฟ", hz: 174.6 }
+        ],
+        right: [
+            { name: "ร", hz: 293.7 },
+            { name: "ด", hz: 261.6 }
+        ],
+        left: [
+            { name: "ม", hz: 329.6 }
+        ]
+    };
+
+    function filterNotes(bridge) {
+        // เปลี่ยนสถานะปุ่มหย่อง
+        document.querySelectorAll('.bridge-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        // สร้างปุ่มโน้ตใหม่
+        const container = document.getElementById('note-container');
+        container.innerHTML = '';
         
-        /* Tuner Display */
-        .tuner-display { background: linear-gradient(to bottom, var(--accent-green), var(--accent-blue)); padding: 30px 20px; text-align: center; transition: background 0.3s; }
-        .note-name { font-size: 1.8em; margin-bottom: 5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
-        .frequency { font-size: 2.8em; font-weight: bold; margin-bottom: 5px; font-family: monospace; }
-        .offset-label { background: var(--gold); color: #7b241c; padding: 4px 25px; border-radius: 20px; display: inline-block; margin-bottom: 20px; font-weight: bold; font-size: 1.1em; min-width: 100px; }
-        
-        /* Meter */
-        .meter-container { width: 100%; height: 80px; position: relative; background: rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; }
-        .meter-scale { width: 100%; height: 100%; background-image: linear-gradient(90deg, white 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px); background-size: 20% 40px, 4% 20px; background-repeat: repeat-x; background-position: bottom; }
-        .center-mark { position: absolute; top: 0; left: 50%; width: 2px; height: 100%; background: rgba(255,255,255,1); z-index: 1; }
-        .needle { position: absolute; bottom: 0; left: 50%; width: 5px; height: 65px; background: #ffeb3b; transform: translateX(-50%); border-radius: 5px 5px 0 0; box-shadow: 0 0 15px rgba(255,235,59,1); transition: left 0.1s cubic-bezier(0.1, 0, 0.1, 1); z-index: 2; }
-        
-        .note-selector { background-color: var(--bg-red); padding: 40px 10px; display: flex; justify-content: space-around; }
-        .note-btn { width: 65px; height: 65px; background: rgba(255,255,255,0.15); transform: rotate(45deg); display: flex; justify-content: center; align-items: center; border: 2px solid rgba(255,255,255,0.4); cursor: pointer; }
-        .note-btn.active { background: rgba(255,255,255,0.4); border-color: white; box-shadow: 0 0 20px rgba(255,255,255,0.6); }
-        .note-btn span { transform: rotate(-45deg); font-size: 1em; font-weight: bold; color: white; }
-        
-        #start-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #start-btn { padding: 18px 50px; font-size: 1.3em; background: var(--gold); border: none; border-radius: 40px; cursor: pointer; font-weight: bold; color: #7b241c; }
-        
-        /* สัญญาณไฟบอกว่าไมค์ทำงาน */
-        #mic-indicator { width: 10px; height: 10px; background: grey; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .mic-active { background: #2ecc71 !important; box-shadow: 0 0 5px #2ecc71; }
-    </style>
-</head>
-<body>
-
-    <div class="app-container">
-        <div id="start-overlay">
-            <h2 style="color: var(--gold);">เครื่องมือตั้งสายขิม</h2>
-            <button id="start-btn">เริ่มใช้งาน</button>
-            <p style="color: #ccc; margin-top: 20px; font-size: 0.8em;">เปิดผ่าน Chrome หรือ Safari เท่านั้น</p>
-        </div>
-
-        <section class="instrument-section">
-            <img src="https://cdn-icons-png.flaticon.com/512/3233/3233497.png" alt="Khim" class="khim-placeholder">
-            <div class="instrument-label">ขิม</div>
-        </section>
-
-        <section class="tuner-display" id="display-bg">
-            <div style="font-size: 0.7em; margin-bottom: 5px;">
-                <span id="mic-indicator"></span> MIC STATUS
-            </div>
-            <div class="note-name" id="display-note">ซอล ๓</div>
-            <div class="frequency" id="display-hz">--- Hz</div>
-            <div class="offset-label" id="offset-hz">0 Hz</div>
-            <div class="meter-container">
-                <div class="center-mark"></div>
-                <div class="meter-scale"></div>
-                <div class="needle" id="needle"></div>
-            </div>
-        </section>
-
-        <nav class="note-selector">
-            <div class="note-btn active" onclick="setTarget(188.9, 'ซอล ๓')"><span>ซอล ๓</span></div>
-            <div class="note-btn" onclick="setTarget(212.5, 'ลา ๒')"><span>ลา ๒</span></div>
-            <div class="note-btn" onclick="setTarget(239.0, 'ที ๒')"><span>ที ๒</span></div>
-            <div class="note-btn" onclick="setTarget(268.6, 'โด')"><span>โด</span></div>
-        </nav>
-    </div>
-
-    <script>
-        let audioContext, analyser, microphone, scriptProcessor;
-        let targetHz = 188.9;
-        const BUFSIZE = 2048;
-
-        function setTarget(hz, name) {
-            targetHz = hz;
-            document.getElementById('display-note').innerText = name;
-            document.querySelectorAll('.note-btn').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        }
-
-        // Algorithm: Autocorrelation (ช่วยหาความถี่ที่แม่นยำขึ้น)
-        function autoCorrelate(buffer, sampleRate) {
-            let size = buffer.length;
-            let rms = 0;
-            for (let i = 0; i < size; i++) {
-                rms += buffer[i] * buffer[i];
-            }
-            rms = Math.sqrt(rms / size);
-            if (rms < 0.01) return -1; // เสียงเบาไป
-
-            let r1 = 0, r2 = size - 1, thres = 0.2;
-            for (let i = 0; i < size / 2; i++) {
-                if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
-            }
-            for (let i = 1; i < size / 2; i++) {
-                if (Math.abs(buffer[size - i]) < thres) { r2 = size - i; break; }
-            }
-            buffer = buffer.slice(r1, r2);
-            size = buffer.length;
-
-            let c = new Array(size).fill(0);
-            for (let i = 0; i < size; i++) {
-                for (let j = 0; j < size - i; j++) {
-                    c[i] = c[i] + buffer[j] * buffer[j + i];
-                }
-            }
-            let d = 0; while (c[d] > c[d + 1]) d++;
-            let maxval = -1, maxpos = -1;
-            for (let i = d; i < size; i++) {
-                if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
-            }
-            let T0 = maxpos;
-            return sampleRate / T0;
-        }
-
-        async function startTuner() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: {
-                    echoCancellation: false,
-                    noiseSuppression: false,
-                    autoGainControl: false
-                }});
-                
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = BUFSIZE;
-                microphone = audioContext.createMediaStreamSource(stream);
-                microphone.connect(analyser);
-
-                // เปลี่ยนไฟสถานะเป็นสีเขียว
-                document.getElementById('mic-indicator').classList.add('mic-active');
-                document.getElementById('start-overlay').style.display = 'none';
-
-                update();
-            } catch (err) {
-                alert("เกิดข้อผิดพลาด: " + err.message);
-            }
-        }
-
-        function update() {
-            const buffer = new Float32Array(BUFSIZE);
-            analyser.getFloatTimeDomainData(buffer);
-            
-            const pitch = autoCorrelate(buffer, audioContext.sampleRate);
-
-            if (pitch !== -1 && pitch < 1000) {
-                const currentHz = pitch.toFixed(1);
-                const diff = pitch - targetHz;
-                
-                document.getElementById('display-hz').innerText = currentHz + " Hz";
-                document.getElementById('offset-hz').innerText = (diff > 0 ? "+" : "") + diff.toFixed(1) + " Hz";
-
-                // เลื่อนเข็ม
-                let moveX = diff * 8; // ปรับความไวเข็มที่นี่
-                if (moveX > 160) moveX = 160;
-                if (moveX < -160) moveX = -160;
-                document.getElementById('needle').style.left = `calc(50% + ${moveX}px)`;
-
-                // เปลี่ยนสีพื้นหลังถ้าเสียงตรง
-                if (Math.abs(diff) < 0.8) {
-                    document.getElementById('display-bg').style.background = "#2ecc71";
-                } else {
-                    document.getElementById('display-bg').style.background = "linear-gradient(to bottom, var(--accent-green), var(--accent-blue))";
-                }
-            }
-            requestAnimationFrame(update);
-        }
-
-        document.getElementById('start-btn').addEventListener('click', () => {
-            startTuner();
+        noteData[bridge].forEach(item => {
+            const btn = document.createElement('div');
+            btn.className = 'note-btn';
+            btn.innerHTML = `<span>${item.name}</span>`;
+            btn.onclick = () => setTarget(item.hz, item.name);
+            container.appendChild(btn);
         });
-    </script>
-</body>
-</html>
+    }
+
+    // เริ่มต้นให้แสดงหย่องกลาง
+    window.onload = () => filterNotes('middle');
+</script>
