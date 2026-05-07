@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - Enhanced Visual Khim</title>
+    <title>Thai Tuner PRO - 2 Bridges Edition</title>
     <style>
         :root {
-            --wood-dark: #3e2723; --wood-main: #5d4037; --wood-light: #8d6e63;
-            --accent-blue: #00f2fe; --bridge-red: #b71c1c; --gold: #f1c40f;
-            --white: #ffffff;
+            --wood-dark: #3e2723; --wood-main: #5d4037; --accent-blue: #00f2fe; 
+            --bridge-red: #b71c1c; --gold: #f1c40f; --white: #ffffff;
         }
 
         body {
@@ -35,26 +34,16 @@
             background: radial-gradient(circle, #fdf5e6 0%, #d2b48c 100%);
             padding: 20px; text-align: center; flex: 0.9;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            position: relative;
         }
 
-        /* SVG รูปขิม */
-        #khim-svg {
-            width: 100%; max-width: 500px; height: auto;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
-        }
+        #khim-svg { width: 100%; max-width: 500px; height: auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
 
-        /* พื้นฐานสายขิม: เส้นบางๆ จำนวนมาก */
-        .khim-string {
-            stroke: #4e342e;
-            stroke-width: 0.3;
-            opacity: 0.5;
-        }
+        .khim-string { stroke: #4e342e; stroke-width: 0.4; opacity: 0.4; }
 
-        /* สไตล์ไฮไลท์เฉพาะจุด: เป็นแถบสีสั้นๆ */
+        /* ไฮไลต์แบบแถบสั้นตามรูปตัวอย่าง */
         .highlight-bar {
             stroke: var(--accent-blue);
-            stroke-width: 3;
+            stroke-width: 3.5;
             stroke-linecap: round;
             opacity: 0;
             transition: opacity 0.2s;
@@ -68,32 +57,31 @@
             display: flex; flex-direction: column; justify-content: center;
         }
 
-        .note-name { font-size: 2.8em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .target-info { font-size: 1.1em; background: rgba(0,0,0,0.2); padding: 2px 15px; border-radius: 10px; margin-top: 5px; display: inline-block; }
+        .note-name { font-size: 2.8em; font-weight: bold; }
         .current-hz { font-size: 3.5em; font-weight: bold; font-family: monospace; margin: 5px 0; }
-        .status-badge { background: var(--gold); color: #7b241c; padding: 5px 25px; border-radius: 20px; font-weight: bold; min-width: 150px; display: inline-block; margin-bottom: 10px; }
+        .status-badge { background: var(--gold); color: #7b241c; padding: 5px 25px; border-radius: 20px; font-weight: bold; }
 
-        .meter-container { width: 100%; height: 50px; position: relative; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
+        .meter-container { width: 100%; height: 50px; position: relative; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; }
         .center-line { position: absolute; left: 50%; width: 3px; height: 100%; background: var(--white); z-index: 1; }
         .needle { position: absolute; bottom: 0; left: 50%; width: 5px; height: 100%; background: #ffeb3b; transform: translateX(-50%); transition: left 0.1s ease-out; z-index: 2; }
 
         .right-panel { display: flex; flex-direction: column; flex: 1.3; background: var(--bridge-red); }
         .bridge-tabs { display: flex; background: #2d1b18; padding: 10px; gap: 8px; }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border-radius: 10px; transition: 0.3s; font-weight: bold; color: #ccc; }
-        .tab.active { background: var(--bridge-red); color: var(--white); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: bold; color: #ccc; }
+        .tab.active { background: var(--bridge-red); color: var(--white); }
 
-        .note-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; align-content: start; flex: 1; }
+        .note-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 15px; overflow-y: auto; flex: 1; }
         
         .note-btn {
             background: rgba(255,255,255,0.15); aspect-ratio: 1/1; transform: rotate(45deg);
             display: flex; justify-content: center; align-items: center;
-            border: 2px solid rgba(255,255,255,0.3); cursor: pointer; margin: 15px; transition: 0.2s;
+            border: 2px solid rgba(255,255,255,0.3); cursor: pointer; margin: 15px;
         }
-        .note-btn.active { background: var(--gold); border-color: var(--white); box-shadow: 0 0 20px var(--gold); }
+        .note-btn.active { background: var(--gold); box-shadow: 0 0 20px var(--gold); border-color: white; }
         .note-btn span { transform: rotate(-45deg); font-weight: bold; color: white; font-size: 1.2em; }
         .note-btn.active span { color: #7b241c; }
 
-        #start-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #start-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         #start-btn { padding: 20px 60px; font-size: 1.6em; background: var(--gold); border: none; border-radius: 50px; cursor: pointer; font-weight: bold; color: #7b241c; }
     </style>
 </head>
@@ -102,111 +90,88 @@
 <div class="app-container">
     <div id="start-overlay">
         <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
-        <p style="color: #aaa;">Data Updated: Custom Hz Scale</p>
+        <p style="color: #aaa;">2 Bridges Edition (Custom Scale)</p>
         <button id="start-btn">เริ่มใช้งาน</button>
     </div>
 
     <div class="left-panel">
         <section class="instrument-section">
             <svg id="khim-svg" viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg">
-                <path d="M30,10 L110,10 Q135,10 130,40 Q125,75 110,77 L30,77 Q15,75 10,40 Q5,10 30,10 Z" fill="var(--wood-dark)"/>
-                <path d="M33,13 L107,13 Q128,13 124,40 Q120,70 107,72 L33,72 Q20,70 16,40 Q12,13 33,13 Z" fill="var(--wood-main)"/>
+                <path d="M25,10 L115,10 Q140,10 135,40 Q130,75 115,77 L25,77 Q10,75 5,40 Q0,10 25,10 Z" fill="var(--wood-dark)"/>
+                <path d="M28,13 L112,13 Q132,13 128,40 Q124,70 112,72 L28,72 Q15,70 11,40 Q7,13 28,13 Z" fill="var(--wood-main)"/>
                 
                 <g fill="var(--gold)">
-                    <circle cx="15" cy="25" r="1"/><circle cx="15" cy="32" r="1"/><circle cx="15" cy="39" r="1"/>
-                    <circle cx="15" cy="46" r="1"/><circle cx="15" cy="53" r="1"/><circle cx="15" cy="60" r="1"/><circle cx="15" cy="67" r="1"/>
-                    <circle cx="125" cy="25" r="1"/><circle cx="125" cy="32" r="1"/><circle cx="125" cy="39" r="1"/>
-                    <circle cx="125" cy="46" r="1"/><circle cx="125" cy="53" r="1"/><circle cx="125" cy="60" r="1"/><circle cx="125" cy="67" r="1"/>
+                    <circle cx="10" cy="25" r="0.8"/><circle cx="10" cy="35" r="0.8"/><circle cx="10" cy="45" r="0.8"/><circle cx="10" cy="55" r="0.8"/><circle cx="10" cy="65" r="0.8"/>
+                    <circle cx="130" cy="25" r="0.8"/><circle cx="130" cy="35" r="0.8"/><circle cx="130" cy="45" r="0.8"/><circle cx="130" cy="55" r="0.8"/><circle cx="130" cy="65" r="0.8"/>
                 </g>
 
-                <rect x="45" y="15" width="3" height="58" rx="1.5" fill="var(--bridge-red)"/> <rect x="70" y="15" width="3" height="58" rx="1.5" fill="var(--bridge-red)"/> <rect x="95" y="15" width="3" height="58" rx="1.5" fill="var(--bridge-red)"/> <g class="khim-strings">
-                    <line x1="20" y1="20" x2="120" y2="20" class="khim-string"/><line x1="20" y1="22" x2="120" y2="22" class="khim-string"/>
-                    <line x1="20" y1="27" x2="120" y2="27" class="khim-string"/><line x1="20" y1="29" x2="120" y2="29" class="khim-string"/>
-                    <line x1="20" y1="34" x2="120" y2="34" class="khim-string"/><line x1="20" y1="36" x2="120" y2="36" class="khim-string"/>
-                    <line x1="20" y1="41" x2="120" y2="41" class="khim-string"/><line x1="20" y1="43" x2="120" y2="43" class="khim-string"/>
-                    <line x1="20" y1="48" x2="120" y2="48" class="khim-string"/><line x1="20" y1="50" x2="120" y2="50" class="khim-string"/>
-                    <line x1="20" y1="55" x2="120" y2="55" class="khim-string"/><line x1="20" y1="57" x2="120" y2="57" class="khim-string"/>
-                    <line x1="20" y1="62" x2="120" y2="62" class="khim-string"/><line x1="20" y1="64" x2="120" y2="64" class="khim-string"/>
+                <rect x="55" y="15" width="2.5" height="58" rx="1" fill="var(--bridge-red)"/> <rect x="85" y="15" width="2.5" height="58" rx="1" fill="var(--bridge-red)"/> <g class="khim-strings">
+                    <line x1="15" y1="21" x2="125" y2="21" class="khim-string"/><line x1="15" y1="23" x2="125" y2="23" class="khim-string"/>
+                    <line x1="15" y1="31" x2="125" y2="31" class="khim-string"/><line x1="15" y1="33" x2="125" y2="33" class="khim-string"/>
+                    <line x1="15" y1="41" x2="125" y2="41" class="khim-string"/><line x1="15" y1="43" x2="125" y2="43" class="khim-string"/>
+                    <line x1="15" y1="51" x2="125" y2="51" class="khim-string"/><line x1="15" y1="53" x2="125" y2="53" class="khim-string"/>
+                    <line x1="15" y1="61" x2="125" y2="61" class="khim-string"/><line x1="15" y1="63" x2="125" y2="63" class="khim-string"/>
                 </g>
 
                 <g id="highlight-layer">
-                    <line id="h-left-7" x1="48" y1="21" x2="67" y2="21" class="highlight-bar"/>
-                    <line id="h-left-6" x1="48" y1="28" x2="67" y2="28" class="highlight-bar"/>
-                    <line id="h-left-5" x1="48" y1="35" x2="67" y2="35" class="highlight-bar"/>
-                    <line id="h-left-4" x1="48" y1="42" x2="67" y2="42" class="highlight-bar"/>
-                    <line id="h-left-3" x1="48" y1="49" x2="67" y2="49" class="highlight-bar"/>
-                    <line id="h-left-2" x1="48" y1="56" x2="67" y2="56" class="highlight-bar"/>
-                    <line id="h-left-1" x1="48" y1="63" x2="67" y2="63" class="highlight-bar"/>
+                    <line id="h-L-1" x1="25" y1="62" x2="45" y2="62" class="highlight-bar"/>
+                    <line id="h-L-2" x1="25" y1="52" x2="45" y2="52" class="highlight-bar"/>
+                    <line id="h-L-3" x1="25" y1="42" x2="45" y2="42" class="highlight-bar"/>
+                    <line id="h-L-4" x1="25" y1="32" x2="45" y2="32" class="highlight-bar"/>
+                    <line id="h-L-5" x1="25" y1="22" x2="45" y2="22" class="highlight-bar"/>
 
-                    <line id="h-mid-7" x1="73" y1="21" x2="92" y2="21" class="highlight-bar"/>
-                    <line id="h-mid-6" x1="73" y1="28" x2="92" y2="28" class="highlight-bar"/>
-                    <line id="h-mid-5" x1="73" y1="35" x2="92" y2="35" class="highlight-bar"/>
-                    <line id="h-mid-4" x1="73" y1="42" x2="92" y2="42" class="highlight-bar"/>
-                    <line id="h-mid-3" x1="73" y1="49" x2="92" y2="49" class="highlight-bar"/>
-                    <line id="h-mid-2" x1="73" y1="56" x2="92" y2="56" class="highlight-bar"/>
-                    <line id="h-mid-1" x1="73" y1="63" x2="92" y2="63" class="highlight-bar"/>
+                    <line id="h-M-1" x1="60" y1="62" x2="80" y2="62" class="highlight-bar"/>
+                    <line id="h-M-2" x1="60" y1="52" x2="80" y2="52" class="highlight-bar"/>
+                    <line id="h-M-3" x1="60" y1="42" x2="80" y2="42" class="highlight-bar"/>
+                    <line id="h-M-4" x1="60" y1="32" x2="80" y2="32" class="highlight-bar"/>
+                    <line id="h-M-5" x1="60" y1="22" x2="80" y2="22" class="highlight-bar"/>
 
-                    <line id="h-right-7" x1="98" y1="21" x2="115" y2="21" class="highlight-bar"/>
-                    <line id="h-right-6" x1="98" y1="28" x2="115" y2="28" class="highlight-bar"/>
-                    <line id="h-right-5" x1="98" y1="35" x2="115" y2="35" class="highlight-bar"/>
-                    <line id="h-right-4" x1="98" y1="42" x2="115" y2="42" class="highlight-bar"/>
-                    <line id="h-right-3" x1="98" y1="49" x2="115" y2="49" class="highlight-bar"/>
-                    <line id="h-right-2" x1="98" y1="56" x2="115" y2="56" class="highlight-bar"/>
-                    <line id="h-right-1" x1="98" y1="63" x2="115" y2="63" class="highlight-bar"/>
+                    <line id="h-R-1" x1="95" y1="62" x2="115" y2="62" class="highlight-bar"/>
+                    <line id="h-R-2" x1="95" y1="52" x2="115" y2="52" class="highlight-bar"/>
+                    <line id="h-R-3" x1="95" y1="42" x2="115" y2="42" class="highlight-bar"/>
+                    <line id="h-R-4" x1="95" y1="32" x2="115" y2="32" class="highlight-bar"/>
+                    <line id="h-R-5" x1="95" y1="22" x2="115" y2="22" class="highlight-bar"/>
                 </g>
             </svg>
-            <div style="color: var(--wood-dark); font-weight: bold; margin-top: 15px; font-size: 1.2em;" id="bridge-title">หย่องกลาง</div>
+            <div style="color: var(--wood-dark); font-weight: bold; margin-top: 10px;" id="bridge-title">หย่องกลาง</div>
         </section>
 
         <section class="tuner-display" id="display-bg">
-            <div class="note-info">
-                <div class="note-name" id="display-note">โด</div>
-                <div class="target-info">เป้าหมาย: <span id="target-hz-val">508.5</span> Hz</div>
-            </div>
+            <div class="note-name" id="display-note">โด</div>
             <div class="current-hz" id="display-hz">---</div>
             <div><div class="status-badge" id="offset-hz">0.0 Hz</div></div>
-            <div class="meter-container"><div class="center-line"></div><div class="needle" id="needle"></div></div>
+            <div style="margin-top:10px" class="meter-container"><div class="center-line"></div><div class="needle" id="needle"></div></div>
         </section>
     </div>
 
     <div class="right-panel">
         <div class="bridge-tabs">
-            <div class="tab" onclick="switchBridge('left')">ซ้าย (นอก)</div>
+            <div class="tab" onclick="switchBridge('left')">ซ้าย</div>
             <div class="tab active" onclick="switchBridge('middle')">กลาง</div>
-            <div class="tab" onclick="switchBridge('right')">ขวา (ใน)</div>
+            <div class="tab" onclick="switchBridge('right')">ขวา</div>
         </div>
         <nav id="note-grid" class="note-grid"></nav>
     </div>
 </div>
 
 <script>
+    // ปรับข้อมูลโน้ตให้สอดคล้องกับระบบ 2 หย่อง
     const noteData = {
-        left: [ 
-            {n:"ซอล", hz:755.7, row:7}, {n:"ฟาร์", hz:684.4, row:6}, {n:"มี", hz:619.9, row:5},
-            {n:"เร", hz:561.5, row:4}, {n:"โด", hz:508.5, row:3}, {n:"ที", hz:460.0, row:2}, {n:"ล", hz:417.2, row:1} 
-        ],
-        middle: [ 
-            {n:"โด", hz:508.5, row:7}, {n:"ที", hz:460.0, row:6}, {n:"ลา", hz:417.2, row:5}, 
-            {n:"ซอล", hz:377.8, row:4}, {n:"ฟาร์", hz:342.2, row:3}, {n:"มี", hz:309.9, row:2}, {n:"เร", hz:280.7, row:1} 
-        ],
-        right: [ 
-            {n:"ฟาร์", hz:342.2, row:7}, {n:"มี", hz:309.9, row:6}, {n:"เร", hz:280.7, row:5}, 
-            {n:"โด", hz:254.2, row:4}, {n:"ที", hz:230.3, row:3}, {n:"ลา", hz:208.5, row:2}, {n:"ซอล", hz:118.9, row:1} 
-        ]
+        left: [ {n:"ซอล", hz:392.0, r:5}, {n:"ฟาร์", hz:349.2, r:4}, {n:"มี", hz:329.6, r:3}, {n:"เร", hz:293.7, r:2}, {n:"โด", hz:261.6, r:1} ],
+        middle: [ {n:"โด", hz:523.3, r:5}, {n:"ที", hz:493.9, r:4}, {n:"ลา", hz:440.0, r:3}, {n:"ซอล", hz:392.0, r:2}, {n:"ฟาร์", hz:349.2, r:1} ],
+        right: [ {n:"ซอลสูง", hz:784.0, r:5}, {n:"ฟาร์สูง", hz:698.5, r:4}, {n:"มีสูง", hz:659.3, r:3}, {n:"เรสูง", hz:587.3, r:2}, {n:"โดสูง", hz:523.3, r:1} ]
     };
 
-    let audioContext, analyser, targetHz = 508.5, currentBridge = 'middle';
+    let audioContext, analyser, targetHz = 523.3, currentBridge = 'middle';
 
-    function highlightUnisonStrings(hz) {
-        document.querySelectorAll('.highlight-bar').forEach(str => str.classList.remove('active'));
-        const bridges = ['left', 'middle', 'right'];
-        const prefixMap = { 'left': 'h-left', 'middle': 'h-mid', 'right': 'h-right' };
-
-        bridges.forEach(bridgeKey => {
-            noteData[bridgeKey].forEach(noteObj => {
-                if (Math.abs(noteObj.hz - hz) < 0.1) {
-                    const elId = `${prefixMap[bridgeKey]}-${noteObj.row}`;
-                    const el = document.getElementById(elId);
+    function highlightStrings(hz) {
+        document.querySelectorAll('.highlight-bar').forEach(s => s.classList.remove('active'));
+        // ตรวจหา Unison ในทุกฝั่ง
+        Object.keys(noteData).forEach(bKey => {
+            noteData[bKey].forEach(n => {
+                if (Math.abs(n.hz - hz) < 0.1) {
+                    const prefix = bKey === 'left' ? 'L' : bKey === 'middle' ? 'M' : 'R';
+                    const el = document.getElementById(`h-${prefix}-${n.r}`);
                     if (el) el.classList.add('active');
                 }
             });
@@ -217,7 +182,7 @@
         currentBridge = bridge;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         if(window.event) window.event.currentTarget.classList.add('active');
-        document.getElementById('bridge-title').innerText = "กำลังตั้งสาย: " + (bridge==='left'?'หย่องซ้าย':bridge==='middle'?'หย่องกลาง':'หย่องขวา');
+        document.getElementById('bridge-title').innerText = "กำลังตั้งสายฝั่ง: " + (bridge==='left'?'ซ้าย':bridge==='middle'?'กลาง':'ขวา');
         renderNotes();
     }
 
@@ -229,14 +194,11 @@
             btn.className = 'note-btn';
             if (item.hz === targetHz) btn.classList.add('active');
             btn.innerHTML = `<span>${item.n}</span>`;
-            
             btn.onclick = () => {
-                document.querySelectorAll('.note-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
                 targetHz = item.hz;
                 document.getElementById('display-note').innerText = item.n;
-                document.getElementById('target-hz-val').innerText = item.hz.toFixed(1);
-                highlightUnisonStrings(item.hz);
+                renderNotes();
+                highlightStrings(targetHz);
             };
             grid.appendChild(btn);
         });
@@ -251,28 +213,20 @@
             audioContext.createMediaStreamSource(stream).connect(analyser);
             document.getElementById('start-overlay').style.display = 'none';
             update();
-        } catch (e) { alert("กรุณาอนุญาตไมค์และใช้งานผ่าน HTTPS"); }
+        } catch (e) { alert("กรุณาเปิดไมโครโฟน"); }
     }
 
     function update() {
         const buffer = new Float32Array(2048);
         analyser.getFloatTimeDomainData(buffer);
         const pitch = autoCorrelate(buffer, audioContext.sampleRate);
-        if (pitch !== -1 && pitch < 2000) {
+        if (pitch !== -1 && pitch < 1200) {
             document.getElementById('display-hz').innerText = pitch.toFixed(1);
-            const centsOff = Math.floor(1200 * Math.log2(pitch / targetHz));
-            document.getElementById('offset-hz').innerText = (pitch - targetHz).toFixed(1) + " Hz";
-            
-            let moveX = centsOff * 3; 
-            if (moveX > 150) moveX = 150; if (moveX < -150) moveX = -150;
+            const diff = pitch - targetHz;
+            document.getElementById('offset-hz').innerText = diff.toFixed(1) + " Hz";
+            let moveX = Math.max(-150, Math.min(150, diff * 5));
             document.getElementById('needle').style.left = `calc(50% + ${moveX}px)`;
-            
-            if (Math.abs(centsOff) <= 10) {
-                document.getElementById('display-bg').style.background = "#2ecc71";
-                document.getElementById('offset-hz').innerText = "ตรงเสียง";
-            } else {
-                document.getElementById('display-bg').style.background = "linear-gradient(to bottom, #48c9b0, #2e86c1)";
-            }
+            document.getElementById('display-bg').style.background = Math.abs(diff) < 1.5 ? "#2ecc71" : "linear-gradient(to bottom, #48c9b0, #2e86c1)";
         }
         requestAnimationFrame(update);
     }
@@ -289,10 +243,7 @@
     }
 
     document.getElementById('start-btn').onclick = startTuner;
-    window.onload = () => {
-        switchBridge('middle');
-        highlightUnisonStrings(targetHz);
-    };
+    window.onload = () => { renderNotes(); highlightStrings(targetHz); };
 </script>
 </body>
 </html>
