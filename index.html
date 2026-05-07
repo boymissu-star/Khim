@@ -3,70 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - ขิม 7 หย่อง</title>
+    <title>Thai Tuner PRO - ขิม 7 หย่อง (Custom Hz)</title>
     <style>
         :root {
             --bg-dark: #3e332d; --bg-red: #a4332d; --bg-cream: #e5d9c5;
             --accent-green: #48c9b0; --accent-blue: #2e86c1; --gold: #f1c40f;
             --white: #ffffff;
         }
+        body { margin: 0; padding: 0; font-family: 'Tahoma', sans-serif; background-color: #1a1a1a; color: var(--white); overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .app-container { width: 100vw; height: 100vh; max-width: 1200px; background: var(--bg-cream); display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
 
-        body {
-            margin: 0; padding: 0; font-family: 'Tahoma', sans-serif;
-            background-color: #1a1a1a; color: var(--white); overflow: hidden;
-            display: flex; justify-content: center; align-items: center; height: 100vh;
-        }
-
-        .app-container {
-            width: 100vw; height: 100vh; max-width: 1200px;
-            background: var(--bg-cream); display: flex; flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5); transition: all 0.3s ease;
-        }
-
-        /* Responsive: Tablet Landscape */
         @media (min-width: 768px) and (orientation: landscape) {
             .app-container { flex-direction: row; height: 85vh; border-radius: 20px; overflow: hidden; }
             .left-panel { flex: 1; border-right: 4px solid var(--bg-red); }
             .right-panel { flex: 1.3; }
         }
 
-        /* ส่วนแสดงผล (ซ้าย) */
         .left-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-        .instrument-section {
-            background: radial-gradient(circle, #f0e6d6 0%, #dcc8ac 100%);
-            padding: 20px; text-align: center; flex: 0.6;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
+        .instrument-section { background: radial-gradient(circle, #f0e6d6 0%, #dcc8ac 100%); padding: 20px; text-align: center; flex: 0.6; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .khim-img { width: 45%; max-width: 180px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2)); }
 
-        .tuner-display {
-            background: linear-gradient(to bottom, var(--accent-green), var(--accent-blue));
-            padding: 25px; text-align: center; border-top: 5px solid var(--bg-red); flex: 1.4;
-            display: flex; flex-direction: column; justify-content: center; transition: background 0.3s;
-        }
-
+        .tuner-display { background: linear-gradient(to bottom, var(--accent-green), var(--accent-blue)); padding: 25px; text-align: center; border-top: 5px solid var(--bg-red); flex: 1.4; display: flex; flex-direction: column; justify-content: center; transition: background 0.3s; }
         .note-name { font-size: 2.2em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         .target-info { font-size: 1.1em; background: rgba(0,0,0,0.2); padding: 2px 15px; border-radius: 10px; margin-top: 5px; display: inline-block; }
         .current-hz { font-size: 4em; font-weight: bold; font-family: monospace; margin: 10px 0; }
         .status-badge { background: var(--gold); color: #7b241c; padding: 5px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2em; display: inline-block; margin-bottom: 15px; min-width: 150px; }
 
-        /* เข็มวัด */
         .meter-container { width: 100%; height: 60px; position: relative; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
         .center-line { position: absolute; left: 50%; width: 3px; height: 100%; background: var(--white); z-index: 1; }
         .needle { position: absolute; bottom: 0; left: 50%; width: 5px; height: 100%; background: #ffeb3b; transform: translateX(-50%); transition: left 0.15s ease-out; z-index: 2; }
 
-        /* ส่วนควบคุม (ขวา) */
         .right-panel { display: flex; flex-direction: column; flex: 1.3; background: var(--bg-red); }
         .bridge-tabs { display: flex; background: var(--bg-dark); padding: 10px; gap: 8px; }
         .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: bold; color: #ccc; }
         .tab.active { background: var(--bg-red); color: var(--white); }
 
         .note-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)); gap: 15px; overflow-y: auto; align-content: start; flex: 1; }
-        .note-btn {
-            background: rgba(255,255,255,0.15); aspect-ratio: 1/1; transform: rotate(45deg);
-            display: flex; justify-content: center; align-items: center;
-            border: 2px solid rgba(255,255,255,0.3); cursor: pointer; margin: 12px;
-        }
+        .note-btn { background: rgba(255,255,255,0.15); aspect-ratio: 1/1; transform: rotate(45deg); display: flex; justify-content: center; align-items: center; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; margin: 12px; }
         .note-btn.active { background: var(--gold); border-color: var(--white); box-shadow: 0 0 20px var(--gold); }
         .note-btn span { transform: rotate(-45deg); font-weight: bold; font-size: 1.2em; color: white; }
         .note-btn.active span { color: #7b241c; }
@@ -80,19 +53,19 @@
 <div class="app-container">
     <div id="start-overlay">
         <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
-        <p style="color: #aaa; margin-bottom: 30px;">เครื่องมือตั้งสายขิม 7 หย่อง<br>ความแม่นยำสูง ±3 Cents</p>
+        <p style="color: #aaa; margin-bottom: 30px;">เครื่องมือตั้งสายขิม 7 หย่อง<br>ความแม่นยำสูง ±10 Cents</p>
         <button id="start-btn">เริ่มใช้งาน</button>
     </div>
 
     <div class="left-panel">
         <section class="instrument-section">
             <img src="https://cdn-icons-png.flaticon.com/512/3233/3233497.png" class="khim-img">
-            <div id="bridge-title" style="color: var(--bg-dark); font-weight: bold; margin-top: 10px;">หย่องกลาง</div>
+            <div id="bridge-title" style="color: var(--bg-dark); font-weight: bold; margin-top: 10px;">หย่องซ้าย</div>
         </section>
 
         <section class="tuner-display" id="display-bg">
-            <div class="note-name" id="display-note">ซอล ๓</div>
-            <div class="target-info">เป้าหมาย: <span id="target-hz-val">293.7</span> Hz</div>
+            <div class="note-name" id="display-note">ซอล</div>
+            <div class="target-info">เป้าหมาย: <span id="target-hz-val">755.7</span> Hz</div>
             <div class="current-hz" id="display-hz">---</div>
             <div class="status-badge" id="status-text">0.0 Hz</div>
             <div class="meter-container">
@@ -104,8 +77,8 @@
 
     <div class="right-panel">
         <div class="bridge-tabs">
-            <div class="tab" onclick="filterNotes('left')">ซ้าย (นอก)</div>
-            <div class="tab active" onclick="filterNotes('middle')">กลาง</div>
+            <div class="tab active" onclick="filterNotes('left')">ซ้าย (นอก)</div>
+            <div class="tab" onclick="filterNotes('middle')">กลาง</div>
             <div class="tab" onclick="filterNotes('right')">ขวา (ใน)</div>
         </div>
         <nav id="note-grid" class="note-grid"></nav>
@@ -113,14 +86,26 @@
 </div>
 
 <script>
-    // ข้อมูลโน้ตเบื้องต้น (รอคุณส่งค่า Hz จริงมาปรับแก้อีกครั้ง)
+    // --- ส่วนแก้ไขค่าความถี่ (Hz) ---
     const noteData = {
-        left: [ {n:"ล", hz:880.0}, {n:"ซ", hz:784.0}, {n:"ฟ", hz:698.5}, {n:"ม", hz:659.3}, {n:"ร", hz:587.3}, {n:"ด", hz:523.3}, {n:"ท", hz:493.9} ],
-        middle: [ {n:"ร", hz:440.0}, {n:"ด", hz:392.0}, {n:"ท", hz:349.2}, {n:"ล", hz:329.6}, {n:"ซ", hz:293.7}, {n:"ฟ", hz:261.6}, {n:"ม", hz:246.9} ],
-        right: [ {n:"ท", hz:220.0}, {n:"ล", hz:196.0}, {n:"ซ", hz:174.6}, {n:"ฟ", hz:164.8}, {n:"ม", hz:146.8}, {n:"ร", hz:130.8}, {n:"ด", hz:123.5} ]
+        left: [ 
+            {n:"ซ", hz:755.7}, // ตัวสูงสุด ซ้ายนอก
+            {n:"ฟ", hz:684.4}, 
+            {n:"ม", hz:619.9}, 
+            {n:"ร", hz:554.4}, // ค่าสมมติ รอเติมจริง
+            {n:"ด", hz:493.9}, // ค่าสมมติ รอเติมจริง
+            {n:"ท", hz:440.0}, // ค่าสมมติ รอเติมจริง
+            {n:"ล", hz:392.0}  // ค่าสมมติ รอเติมจริง
+        ],
+        middle: [ 
+            {n:"ร", hz:440.0}, {n:"ด", hz:392.0}, {n:"ท", hz:349.2}, {n:"ล", hz:329.6}, {n:"ซ", hz:293.7}, {n:"ฟ", hz:261.6}, {n:"ม", hz:246.9} 
+        ],
+        right: [ 
+            {n:"ท", hz:220.0}, {n:"ล", hz:196.0}, {n:"ซ", hz:174.6}, {n:"ฟ", hz:164.8}, {n:"ม", hz:146.8}, {n:"ร", hz:130.8}, {n:"ด", hz:123.5} 
+        ]
     };
 
-    let audioContext, analyser, targetHz = 293.7;
+    let audioContext, analyser, targetHz = 755.7;
 
     function filterNotes(bridge) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -163,25 +148,22 @@
 
         if (pitch !== -1 && pitch < 2000) {
             document.getElementById('display-hz').innerText = pitch.toFixed(1);
-            
-            // คำนวณความต่าง
             const hzDiff = pitch - targetHz;
             const centsOff = Math.floor(1200 * Math.log2(pitch / targetHz));
-            
-            // แสดงสถานะ Hz
             document.getElementById('status-text').innerText = (hzDiff > 0 ? "+" : "") + hzDiff.toFixed(1) + " Hz";
 
-            // ขยับเข็ม (สเกล +-50 Cents)
             let moveX = centsOff * 3;
             if (moveX > 150) moveX = 150; if (moveX < -150) moveX = -150;
             document.getElementById('needle').style.left = `calc(50% + ${moveX}px)`;
 
-            // เช็คความแม่นยำ 3 Cents
-            if (Math.abs(centsOff) <= 3) {
+            // เช็คระยะความแม่นยำที่ ±10 Cents
+            if (Math.abs(centsOff) <= 10) {
                 document.getElementById('display-bg').style.background = "#2ecc71";
-                document.getElementById('status-text').innerText = "ตรงเสียง (±3 Cents)";
+                document.getElementById('status-text').innerText = "ตรงเสียง (±10 Cents)";
+                document.getElementById('status-text').style.color = "white";
             } else {
                 document.getElementById('display-bg').style.background = "linear-gradient(to bottom, var(--accent-green), var(--accent-blue))";
+                document.getElementById('status-text').style.color = "#7b241c";
             }
         }
         requestAnimationFrame(update);
@@ -199,7 +181,7 @@
     }
 
     document.getElementById('start-btn').onclick = startTuner;
-    window.onload = () => filterNotes('middle');
+    window.onload = () => filterNotes('left');
 </script>
 </body>
 </html>
