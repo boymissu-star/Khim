@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - 2 Bridges Edition</title>
+    <title>Thai Tuner PRO - High Contrast Edition</title>
     <style>
         :root {
-            --wood-dark: #3e2723; --wood-main: #5d4037; --accent-blue: #00f2fe; 
-            --bridge-red: #b71c1c; --gold: #f1c40f; --white: #ffffff;
+            --wood-dark: #3e2723; 
+            --wood-main: #5d4037; 
+            --accent-blue: #00f2fe; 
+            --bridge-red: #b71c1c; 
+            --gold: #f1c40f; 
+            --white: #ffffff;
+            /* เพิ่มตัวแปรสีสายขิมให้เข้มขึ้น */
+            --string-dark: #1a0f0d; 
         }
 
         body {
@@ -38,16 +44,20 @@
 
         #khim-svg { width: 100%; max-width: 500px; height: auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
 
-        .khim-string { stroke: #4e342e; stroke-width: 0.4; opacity: 0.4; }
+        /* ปรับความเข้มและความหนาของเส้นสายขิม */
+        .khim-string { 
+            stroke: var(--string-dark); 
+            stroke-width: 0.6; /* หนาขึ้นจากเดิม */
+            opacity: 0.8;    /* ลดความโปร่งใสเพื่อให้สีชัดขึ้น */
+        }
 
-        /* ไฮไลต์แบบแถบสั้นตามรูปตัวอย่าง */
         .highlight-bar {
             stroke: var(--accent-blue);
-            stroke-width: 3.5;
+            stroke-width: 4;
             stroke-linecap: round;
             opacity: 0;
             transition: opacity 0.2s;
-            filter: drop-shadow(0 0 5px var(--accent-blue));
+            filter: drop-shadow(0 0 8px var(--accent-blue));
         }
         .highlight-bar.active { opacity: 1; }
 
@@ -90,29 +100,37 @@
 <div class="app-container">
     <div id="start-overlay">
         <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
-        <p style="color: #aaa;">2 Bridges Edition (Custom Scale)</p>
+        <p style="color: #aaa;">2 Bridges Edition - High Contrast</p>
         <button id="start-btn">เริ่มใช้งาน</button>
     </div>
 
     <div class="left-panel">
         <section class="instrument-section">
             <svg id="khim-svg" viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg">
+                <!-- ตัวเครื่องขิม -->
                 <path d="M25,10 L115,10 Q140,10 135,40 Q130,75 115,77 L25,77 Q10,75 5,40 Q0,10 25,10 Z" fill="var(--wood-dark)"/>
                 <path d="M28,13 L112,13 Q132,13 128,40 Q124,70 112,72 L28,72 Q15,70 11,40 Q7,13 28,13 Z" fill="var(--wood-main)"/>
                 
-                <g fill="var(--gold)">
-                    <circle cx="10" cy="25" r="0.8"/><circle cx="10" cy="35" r="0.8"/><circle cx="10" cy="45" r="0.8"/><circle cx="10" cy="55" r="0.8"/><circle cx="10" cy="65" r="0.8"/>
-                    <circle cx="130" cy="25" r="0.8"/><circle cx="130" cy="35" r="0.8"/><circle cx="130" cy="45" r="0.8"/><circle cx="130" cy="55" r="0.8"/><circle cx="130" cy="65" r="0.8"/>
+                <!-- ลูกบิดด้านข้าง (Pins) -->
+                <g fill="#2c1e1c">
+                    <circle cx="11" cy="22" r="1.2"/><circle cx="11" cy="32" r="1.2"/><circle cx="11" cy="42" r="1.2"/><circle cx="11" cy="52" r="1.2"/><circle cx="11" cy="62" r="1.2"/>
+                    <circle cx="129" cy="22" r="1.2"/><circle cx="129" cy="32" r="1.2"/><circle cx="129" cy="42" r="1.2"/><circle cx="129" cy="52" r="1.2"/><circle cx="129" cy="62" r="1.2"/>
                 </g>
 
-                <rect x="55" y="15" width="2.5" height="58" rx="1" fill="var(--bridge-red)"/> <rect x="85" y="15" width="2.5" height="58" rx="1" fill="var(--bridge-red)"/> <g class="khim-strings">
-                    <line x1="15" y1="21" x2="125" y2="21" class="khim-string"/><line x1="15" y1="23" x2="125" y2="23" class="khim-string"/>
-                    <line x1="15" y1="31" x2="125" y2="31" class="khim-string"/><line x1="15" y1="33" x2="125" y2="33" class="khim-string"/>
-                    <line x1="15" y1="41" x2="125" y2="41" class="khim-string"/><line x1="15" y1="43" x2="125" y2="43" class="khim-string"/>
-                    <line x1="15" y1="51" x2="125" y2="51" class="khim-string"/><line x1="15" y1="53" x2="125" y2="53" class="khim-string"/>
-                    <line x1="15" y1="61" x2="125" y2="61" class="khim-string"/><line x1="15" y1="63" x2="125" y2="63" class="khim-string"/>
+                <!-- 2 หย่องกลาง ตามภาพถ่าย -->
+                <rect x="55" y="15" width="2.5" height="58" rx="1" fill="var(--bridge-red)"/> 
+                <rect x="85" y="15" width="2.5" height="58" rx="1" fill="var(--bridge-red)"/> 
+
+                <!-- เส้นสายขิม (ปรับความเข้มและหนาขึ้น) -->
+                <g class="khim-strings">
+                    <line x1="12" y1="21" x2="128" y2="21" class="khim-string"/><line x1="12" y1="23" x2="128" y2="23" class="khim-string"/>
+                    <line x1="12" y1="31" x2="128" y2="31" class="khim-string"/><line x1="12" y1="33" x2="128" y2="33" class="khim-string"/>
+                    <line x1="12" y1="41" x2="128" y2="41" class="khim-string"/><line x1="12" y1="43" x2="128" y2="43" class="khim-string"/>
+                    <line x1="12" y1="51" x2="128" y2="51" class="khim-string"/><line x1="12" y1="53" x2="128" y2="53" class="khim-string"/>
+                    <line x1="12" y1="61" x2="128" y2="61" class="khim-string"/><line x1="12" y1="63" x2="128" y2="63" class="khim-string"/>
                 </g>
 
+                <!-- ไฮไลต์แถบสั้นเรืองแสง -->
                 <g id="highlight-layer">
                     <line id="h-L-1" x1="25" y1="62" x2="45" y2="62" class="highlight-bar"/>
                     <line id="h-L-2" x1="25" y1="52" x2="45" y2="52" class="highlight-bar"/>
@@ -155,7 +173,6 @@
 </div>
 
 <script>
-    // ปรับข้อมูลโน้ตให้สอดคล้องกับระบบ 2 หย่อง
     const noteData = {
         left: [ {n:"ซอล", hz:392.0, r:5}, {n:"ฟาร์", hz:349.2, r:4}, {n:"มี", hz:329.6, r:3}, {n:"เร", hz:293.7, r:2}, {n:"โด", hz:261.6, r:1} ],
         middle: [ {n:"โด", hz:523.3, r:5}, {n:"ที", hz:493.9, r:4}, {n:"ลา", hz:440.0, r:3}, {n:"ซอล", hz:392.0, r:2}, {n:"ฟาร์", hz:349.2, r:1} ],
@@ -166,7 +183,6 @@
 
     function highlightStrings(hz) {
         document.querySelectorAll('.highlight-bar').forEach(s => s.classList.remove('active'));
-        // ตรวจหา Unison ในทุกฝั่ง
         Object.keys(noteData).forEach(bKey => {
             noteData[bKey].forEach(n => {
                 if (Math.abs(n.hz - hz) < 0.1) {
