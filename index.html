@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - Multi-Highlight</title>
+    <title>Thai Tuner PRO - The Standard</title>
     <style>
         :root {
             --wood-dark: #3e2723; --wood-main: #5d4037; --accent-blue: #00f2fe; 
@@ -38,7 +38,6 @@
         #khim-svg { width: 100%; max-width: 400px; height: auto; }
         .khim-string { stroke: #1a0f0d; stroke-width: 0.8; opacity: 0.4; }
         
-        /* ไฮไลท์จุดที่ซ้ำกัน */
         .string-highlight {
             fill: var(--accent-blue); opacity: 0; transition: opacity 0.2s;
             filter: drop-shadow(0 0 8px var(--accent-blue));
@@ -102,7 +101,7 @@
 
 <div class="app-container">
     <div id="start-overlay">
-        <h1 style="color: var(--gold);">Thai Tuner Smart-Sync</h1>
+        <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
         <button id="start-btn">เริ่มตั้งสาย</button>
     </div>
 
@@ -113,10 +112,7 @@
                 <path d="M28,13 L112,13 Q132,13 128,40 Q124,70 112,72 L28,72 Q15,70 11,40 Q7,13 28,13 Z" fill="var(--wood-main)"/>
                 <rect x="55" y="15" width="2" height="58" fill="var(--bridge-red)"/> 
                 <rect x="85" y="15" width="2" height="58" fill="var(--bridge-red)"/> 
-                
                 <g id="strings-group"></g>
-                
-                <!-- ไฮไลท์ทั้งหมด (เตรียมไว้ทุุกจุด) -->
                 <g id="highlights-group"></g>
             </svg>
         </section>
@@ -144,7 +140,6 @@
 </div>
 
 <script>
-    // ข้อมูลโน้ตที่มีตำแหน่ง X, Y กำกับทุุกตัว
     const noteData = {
         left: [ {n:"ซอล (สูง)", hz:755.7, y:20, x:30}, {n:"ฟาร์", hz:684.4, y:28, x:30}, {n:"มี", hz:619.9, y:36, x:30}, {n:"เร", hz:561.5, y:44, x:30}, {n:"โด", hz:508.5, y:52, x:30}, {n:"ที", hz:460.0, y:60, x:30}, {n:"ลา", hz:417.2, y:68, x:30} ],
         middle: [ {n:"โด", hz:508.5, y:20, x:65}, {n:"ที", hz:460.0, y:28, x:65}, {n:"ลา", hz:417.2, y:36, x:65}, {n:"ซอล", hz:377.8, y:44, x:65}, {n:"ฟาร์", hz:342.2, y:52, x:65}, {n:"มี", hz:309.9, y:60, x:65}, {n:"เร", hz:280.7, y:68, x:65} ],
@@ -155,12 +150,9 @@
     let pitchSamples = [];
     let lastUpdateTime = 0;
 
-    // สร้างสายและไฮไลท์เตรียมไว้
     function initVisuals() {
         const svgStrings = document.getElementById('strings-group');
         const svgHighs = document.getElementById('highlights-group');
-        
-        // สายขิม
         for(let i=0; i<7; i++) {
             let y = 20 + (i*8);
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -168,38 +160,20 @@
             line.setAttribute("class", "khim-string");
             svgStrings.appendChild(line);
         }
-
-        // ไฮไลท์สำหรับทุกตำแหน่งโน้ตในข้อมูล
-        Object.values(noteData).flat().forEach((note, idx) => {
+        Object.values(noteData).flat().forEach((note) => {
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            rect.setAttribute("x", note.x);
-            rect.setAttribute("y", note.y - 2.5);
-            rect.setAttribute("width", "15");
-            rect.setAttribute("height", "5");
-            rect.setAttribute("rx", "2");
-            rect.setAttribute("class", "string-highlight");
-            rect.setAttribute("data-hz", note.hz); // ผูกค่า Hz ไว้ตรวจสอบ
+            rect.setAttribute("x", note.x); rect.setAttribute("y", note.y - 2.5); rect.setAttribute("width", "15"); rect.setAttribute("height", "5");
+            rect.setAttribute("rx", "2"); rect.setAttribute("class", "string-highlight"); rect.setAttribute("data-hz", note.hz);
             svgHighs.appendChild(rect);
         });
     }
 
     function updateVisualHighlights(selectedHz) {
-        // อัปเดตจุดบนตัวขิม
         document.querySelectorAll('.string-highlight').forEach(el => {
-            if (parseFloat(el.getAttribute('data-hz')) === selectedHz) {
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
+            el.classList.toggle('active', parseFloat(el.getAttribute('data-hz')) === selectedHz);
         });
-
-        // อัปเดตปุ่มในตาราง
         document.querySelectorAll('.note-btn').forEach(btn => {
-            if (parseFloat(btn.dataset.hz) === selectedHz) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+            btn.classList.toggle('active', parseFloat(btn.dataset.hz) === selectedHz);
         });
     }
 
@@ -242,7 +216,6 @@
         analyser.getFloatTimeDomainData(buffer);
         const pitch = yinPitch(buffer, audioContext.sampleRate);
         if (pitch > 80 && pitch < 1200) pitchSamples.push(pitch);
-
         if (now - lastUpdateTime > 150) {
             if (pitchSamples.length > 0) {
                 const avgPitch = pitchSamples.reduce((a, b) => a + b) / pitchSamples.length;
@@ -261,7 +234,6 @@
         grid.innerHTML = '';
         noteData[currentBridge].forEach(item => {
             const btn = document.createElement('div');
-            // เช็กว่า Hz นี้ตรงกับเป้าหมายปัจจุบันหรือไม่ (ใช้สำหรับไฮไลท์ตัวซ้ำ)
             btn.className = 'note-btn' + (item.hz === targetHz ? ' active' : '');
             btn.dataset.hz = item.hz;
             btn.innerHTML = `<span class="n">${item.n}</span><span class="h">${item.hz} Hz</span>`;
