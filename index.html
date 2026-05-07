@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - Interactive Khim 7</title>
+    <title>Thai Tuner PRO - Smart Unison Highlight</title>
     <style>
         :root {
             --wood-dark: #3e2723; --wood-main: #5d4037; --wood-light: #8d6e63;
@@ -17,21 +17,18 @@
             display: flex; justify-content: center; align-items: center; height: 100vh;
         }
 
-        /* Container หลักที่ปรับตัวตามหน้าจอ Tablet */
         .app-container {
             width: 100vw; height: 100vh; max-width: 1200px;
             background: #e5d9c5; display: flex; flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5); transition: all 0.3s ease;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        /* Responsive: Tablet Landscape */
         @media (min-width: 768px) and (orientation: landscape) {
             .app-container { flex-direction: row; height: 85vh; border-radius: 20px; overflow: hidden; }
             .left-panel { flex: 1; border-right: 4px solid var(--bridge-red); }
             .right-panel { flex: 1.3; }
         }
 
-        /* ส่วนซ้าย: จอแสดงผลและรูปขิม */
         .left-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
         
         .instrument-section {
@@ -42,31 +39,28 @@
 
         #khim-svg { width: 100%; max-width: 450px; height: auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
 
-        /* สไตล์เส้นไฮไลท์ */
         .highlight-bar {
             stroke: var(--accent-blue); stroke-width: 4; stroke-linecap: round;
             opacity: 0; transition: opacity 0.2s, stroke-width 0.2s;
-            filter: drop-shadow(0 0 5px var(--accent-blue));
+            filter: drop-shadow(0 0 8px var(--accent-blue));
         }
         .highlight-bar.active { opacity: 1; stroke-width: 5; }
 
         .tuner-display {
             background: linear-gradient(to bottom, #48c9b0, #2e86c1);
             padding: 20px; text-align: center; border-top: 5px solid var(--bridge-red); flex: 1.2;
-            display: flex; flex-direction: column; justify-content: center; transition: background 0.3s;
+            display: flex; flex-direction: column; justify-content: center;
         }
 
-        .note-name { font-size: 2em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .note-name { font-size: 2.5em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         .target-info { font-size: 1.1em; background: rgba(0,0,0,0.2); padding: 2px 15px; border-radius: 10px; margin-top: 5px; display: inline-block; }
         .current-hz { font-size: 3.5em; font-weight: bold; font-family: monospace; margin: 5px 0; }
-        .status-badge { background: var(--gold); color: #7b241c; padding: 5px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2em; display: inline-block; margin-bottom: 10px; min-width: 150px; }
+        .status-badge { background: var(--gold); color: #7b241c; padding: 5px 25px; border-radius: 20px; font-weight: bold; min-width: 150px; display: inline-block; margin-bottom: 10px; }
 
-        /* เข็มวัด */
-        .meter-container { width: 100%; height: 50px; position: relative; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); margin-top: 5px; }
+        .meter-container { width: 100%; height: 50px; position: relative; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
         .center-line { position: absolute; left: 50%; width: 3px; height: 100%; background: var(--white); z-index: 1; }
-        .needle { position: absolute; bottom: 0; left: 50%; width: 5px; height: 100%; background: #ffeb3b; transform: translateX(-50%); transition: left 0.1s cubic-bezier(0.1, 0, 0.1, 1); z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .needle { position: absolute; bottom: 0; left: 50%; width: 5px; height: 100%; background: #ffeb3b; transform: translateX(-50%); transition: left 0.1s ease-out; z-index: 2; }
 
-        /* ส่วนขวา: แผงควบคุมปุ่ม */
         .right-panel { display: flex; flex-direction: column; flex: 1.3; background: var(--bridge-red); }
         .bridge-tabs { display: flex; background: #2d1b18; padding: 10px; gap: 8px; }
         .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border-radius: 10px; transition: 0.3s; font-weight: bold; color: #ccc; }
@@ -80,38 +74,42 @@
             border: 2px solid rgba(255,255,255,0.3); cursor: pointer; margin: 12px; transition: 0.2s;
         }
         .note-btn.active { background: var(--gold); border-color: var(--white); box-shadow: 0 0 20px var(--gold); }
-        .note-btn span { transform: rotate(-45deg); font-weight: bold; color: white; font-size: 1.2em; }
+        .note-btn span { transform: rotate(-45deg); font-weight: bold; color: white; font-size: 1.3em; }
         .note-btn.active span { color: #7b241c; }
 
-        /* หน้าจอเริ่มต้น */
         #start-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #start-btn { padding: 20px 60px; font-size: 1.6em; background: var(--gold); border: none; border-radius: 50px; cursor: pointer; font-weight: bold; color: #7b241c; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        #start-btn { padding: 20px 60px; font-size: 1.6em; background: var(--gold); border: none; border-radius: 50px; cursor: pointer; font-weight: bold; color: #7b241c; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div id="start-overlay">
-        <h1 style="color: var(--gold); margin-bottom: 10px;">Thai Tuner PRO</h1>
-        <p style="color: #aaa; margin-bottom: 30px;">เครื่องมือตั้งสายขิม 7 หย่อง<br>Interactive Highlight ±10 Cents</p>
+        <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
+        <p style="color: #aaa;">Smart Unison Highlight Active</p>
         <button id="start-btn">เริ่มใช้งาน</button>
     </div>
 
     <div class="left-panel">
         <section class="instrument-section">
             <svg id="khim-svg" viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg">
+                <!-- Body -->
                 <path d="M30,10 L110,10 Q135,10 130,40 Q125,75 110,77 L30,77 Q15,75 10,40 Q5,10 30,10 Z" fill="var(--wood-dark)"/>
                 <path d="M33,13 L107,13 Q128,13 124,40 Q120,70 107,72 L33,72 Q20,70 16,40 Q12,13 33,13 Z" fill="var(--wood-main)"/>
+                <!-- Bridges -->
                 <rect x="45" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
                 <rect x="70" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
                 <rect x="95" y="15" width="3" height="50" rx="1.5" fill="var(--bridge-red)"/>
+                <!-- Strings Shadow -->
                 <g stroke="#333" stroke-width="0.2" opacity="0.4">
                     <line x1="20" y1="20" x2="120" y2="20"/><line x1="20" y1="27" x2="120" y2="27"/>
                     <line x1="20" y1="34" x2="120" y2="34"/><line x1="20" y1="41" x2="120" y2="41"/>
                     <line x1="20" y1="48" x2="120" y2="48"/><line x1="20" y1="55" x2="120" y2="55"/>
                     <line x1="20" y1="62" x2="120" y2="62"/>
                 </g>
+                <!-- Interactive Highlights -->
                 <g id="highlight-layer">
+                    <!-- Row 7 to 1 -->
                     <line id="h-left-7" x1="25" y1="20" x2="43" y2="20" class="highlight-bar"/><line id="h-mid-7" x1="48" y1="20" x2="68" y2="20" class="highlight-bar"/><line id="h-right-7" x1="73" y1="20" x2="93" y2="20" class="highlight-bar"/>
                     <line id="h-left-6" x1="25" y1="27" x2="43" y2="27" class="highlight-bar"/><line id="h-mid-6" x1="48" y1="27" x2="68" y2="27" class="highlight-bar"/><line id="h-right-6" x1="73" y1="27" x2="93" y2="27" class="highlight-bar"/>
                     <line id="h-left-5" x1="25" y1="34" x2="43" y2="34" class="highlight-bar"/><line id="h-mid-5" x1="48" y1="34" x2="68" y2="34" class="highlight-bar"/><line id="h-right-5" x1="73" y1="34" x2="93" y2="34" class="highlight-bar"/>
@@ -146,16 +144,10 @@
 </div>
 
 <script>
-    // --- ส่วนข้อมูลโน้ตและค่าความถี่ (Hz) เรียงจากแถว 7-1 (บนลงล่าง) ---
     const noteData = {
         left: [ 
-            {n:"ซ", hz:755.7, row:7}, // ตัวสูงสุด ซ้ายนอก ตามที่คุณบอก
-            {n:"ฟ", hz:684.4, row:6}, 
-            {n:"ม", hz:619.9, row:5},
-            {n:"ร", hz:554.4, row:4}, // ค่าสมมติ
-            {n:"ด", hz:493.9, row:3}, // ค่าสมมติ
-            {n:"ท", hz:440.0, row:2}, // ค่าสมมติ
-            {n:"ล", hz:392.0, row:1}  // ค่าสมมติ
+            {n:"ซ", hz:755.7, row:7}, {n:"ฟ", hz:684.4, row:6}, {n:"ม", hz:619.9, row:5},
+            {n:"ร", hz:554.4, row:4}, {n:"ด", hz:493.9, row:3}, {n:"ท", hz:440.0, row:2}, {n:"ล", hz:392.0, row:1} 
         ],
         middle: [ 
             {n:"ร", hz:440.0, row:7}, {n:"ด", hz:392.0, row:6}, {n:"ท", hz:349.2, row:5}, {n:"ล", hz:329.6, row:4}, {n:"ซ", hz:293.7, row:3}, {n:"ฟ", hz:261.6, row:2}, {n:"ม", hz:246.9, row:1} 
@@ -167,17 +159,30 @@
 
     let audioContext, analyser, targetHz = 293.7, currentBridge = 'middle';
 
-    function highlightString(row) {
+    // --- Smart Unison Highlight Logic ---
+    function highlightUnisonStrings(hz) {
+        // ล้างสีไฮไลท์เก่า
         document.querySelectorAll('.highlight-bar').forEach(str => str.classList.remove('active'));
+
+        const bridges = ['left', 'middle', 'right'];
         const prefixMap = { 'left': 'h-left', 'middle': 'h-mid', 'right': 'h-right' };
-        const activeString = document.getElementById(`${prefixMap[currentBridge]}-${row}`);
-        if(activeString) activeString.classList.add('active');
+
+        bridges.forEach(bridgeKey => {
+            noteData[bridgeKey].forEach(noteObj => {
+                // ถ้าค่าความถี่ตรงกัน (ต่างกันไม่เกิน 0.1 เพื่อความชัวร์) ให้สว่างขึ้นมา
+                if (Math.abs(noteObj.hz - hz) < 0.1) {
+                    const elId = `${prefixMap[bridgeKey]}-${noteObj.row}`;
+                    const el = document.getElementById(elId);
+                    if (el) el.classList.add('active');
+                }
+            });
+        });
     }
 
     function switchBridge(bridge) {
         currentBridge = bridge;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        if(event) event.currentTarget.classList.add('active');
+        if(window.event) window.event.currentTarget.classList.add('active');
         document.getElementById('bridge-title').innerText = "กำลังตั้งสาย: " + (bridge==='left'?'หย่องซ้าย':bridge==='middle'?'หย่องกลาง':'หย่องขวา');
         renderNotes();
     }
@@ -188,14 +193,16 @@
         noteData[currentBridge].forEach(item => {
             const btn = document.createElement('div');
             btn.className = 'note-btn';
+            if (item.hz === targetHz) btn.classList.add('active');
             btn.innerHTML = `<span>${item.n}</span>`;
+            
             btn.onclick = () => {
                 document.querySelectorAll('.note-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 targetHz = item.hz;
                 document.getElementById('display-note').innerText = item.n;
                 document.getElementById('target-hz-val').innerText = item.hz.toFixed(1);
-                highlightString(item.row);
+                highlightUnisonStrings(item.hz);
             };
             grid.appendChild(btn);
         });
@@ -219,17 +226,16 @@
         const pitch = autoCorrelate(buffer, audioContext.sampleRate);
         if (pitch !== -1 && pitch < 2000) {
             document.getElementById('display-hz').innerText = pitch.toFixed(1);
-            const hzDiff = pitch - targetHz;
             const centsOff = Math.floor(1200 * Math.log2(pitch / targetHz));
-            document.getElementById('offset-hz').innerText = (hzDiff > 0 ? "+" : "") + hzDiff.toFixed(1) + " Hz";
+            document.getElementById('offset-hz').innerText = (pitch - targetHz).toFixed(1) + " Hz";
+            
             let moveX = centsOff * 3; 
             if (moveX > 150) moveX = 150; if (moveX < -150) moveX = -150;
             document.getElementById('needle').style.left = `calc(50% + ${moveX}px)`;
             
-            // เกณฑ์ ±10 Cents สำหรับไฟเขียว
             if (Math.abs(centsOff) <= 10) {
                 document.getElementById('display-bg').style.background = "#2ecc71";
-                document.getElementById('offset-hz').innerText = "ตรงเสียง (±10 Cents)";
+                document.getElementById('offset-hz').innerText = "ตรงเสียง";
             } else {
                 document.getElementById('display-bg').style.background = "linear-gradient(to bottom, #48c9b0, #2e86c1)";
             }
@@ -249,7 +255,10 @@
     }
 
     document.getElementById('start-btn').onclick = startTuner;
-    window.onload = () => switchBridge('middle');
+    window.onload = () => {
+        switchBridge('middle');
+        highlightUnisonStrings(targetHz);
+    };
 </script>
 </body>
 </html>
