@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - Full Visuals</title>
+    <title>Thai Tuner PRO - Multi-Highlight</title>
     <style>
         :root {
             --wood-dark: #3e2723; --wood-main: #5d4037; --accent-blue: #00f2fe; 
@@ -28,7 +28,6 @@
             .right-panel { flex: 1; }
         }
 
-        /* ฝั่งซ้าย: เครื่องดนตรี และ Tuner */
         .left-panel { display: flex; flex-direction: column; flex: 1.2; min-height: 0; }
         
         .instrument-section { 
@@ -37,12 +36,12 @@
         }
 
         #khim-svg { width: 100%; max-width: 400px; height: auto; }
-        .khim-string { stroke: #1a0f0d; stroke-width: 0.8; opacity: 0.6; }
+        .khim-string { stroke: #1a0f0d; stroke-width: 0.8; opacity: 0.4; }
         
-        /* ไฮไลท์จุดที่เลือก (เหมือนในรูป) */
+        /* ไฮไลท์จุดที่ซ้ำกัน */
         .string-highlight {
-            fill: var(--accent-blue); opacity: 0; transition: opacity 0.3s;
-            filter: drop-shadow(0 0 5px var(--accent-blue));
+            fill: var(--accent-blue); opacity: 0; transition: opacity 0.2s;
+            filter: drop-shadow(0 0 8px var(--accent-blue));
         }
         .string-highlight.active { opacity: 1; }
 
@@ -53,45 +52,32 @@
         }
 
         .note-display-title { font-size: 2.2em; font-weight: bold; margin: 0; }
-        .target-hz-text { font-size: 2.8em; font-weight: bold; margin: 5px 0; }
+        .target-hz-text { font-size: 2.5em; font-weight: bold; margin: 5px 0; color: white; }
 
-        /* กล่องแสดงค่า Hz จริง */
         .hz-box-container { margin: 10px 0; }
         .live-hz-box {
             background: var(--gold); color: #7b241c; 
             display: inline-block; min-width: 180px; padding: 12px 25px; 
-            border-radius: 12px; font-size: 2.5em; font-weight: bold;
+            border-radius: 12px; font-size: 2.8em; font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 2px solid white;
         }
 
-        /* ไม้วัดและหมุด (Needle) */
-        .scale-area {
-            width: 95%; margin: 10px auto; position: relative; height: 80px;
-        }
-        .scale-labels {
-            display: flex; justify-content: space-between; font-weight: bold;
-            font-size: 1.1em; color: white; padding: 0 10px;
-        }
-        .scale-ticks {
-            width: 100%; height: 30px; margin-top: 5px;
-            background-image: repeating-linear-gradient(90deg, white 0px, white 2px, transparent 2px, transparent 10%);
-            border-bottom: 3px solid white;
-        }
+        .scale-area { width: 95%; margin: 10px auto; position: relative; height: 80px; }
+        .scale-labels { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1em; color: white; padding: 0 10px; }
+        .scale-ticks { width: 100%; height: 30px; margin-top: 5px; background-image: repeating-linear-gradient(90deg, white 0px, white 2px, transparent 2px, transparent 10%); border-bottom: 3px solid white; }
         
-        /* รูปหมุด (Needle) */
         .needle-pin {
             position: absolute; bottom: 0; left: 50%; width: 4px; height: 50px;
             background: #ffeb3b; transform: translateX(-50%);
             box-shadow: 0 0 8px rgba(0,0,0,0.5); transition: left 0.1s ease-out;
             border-radius: 2px; z-index: 10;
         }
-        .needle-pin::after { /* หัวหมุด */
+        .needle-pin::after {
             content: ''; position: absolute; top: -10px; left: -6px;
             border-left: 8px solid transparent; border-right: 8px solid transparent;
             border-bottom: 15px solid #ffeb3b;
         }
 
-        /* ฝั่งขวา: เมนูเลือกโน้ต */
         .right-panel { display: flex; flex-direction: column; flex: 1; background: var(--bridge-red); }
         .bridge-tabs { display: flex; background: #2d1b18; padding: 8px; gap: 5px; }
         .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; border-radius: 8px; font-weight: bold; color: #aaa; font-size: 0.8em; }
@@ -99,13 +85,13 @@
 
         .note-grid { padding: 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; overflow-y: auto; flex: 1; }
         .note-btn {
-            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px;
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
             border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;
         }
-        .note-btn.active { background: var(--gold); border-color: white; }
-        .note-btn .n { font-size: 1.5em; font-weight: bold; color: white; }
-        .note-btn .h { font-size: 0.9em; color: rgba(255,255,255,0.6); }
+        .note-btn.active { background: var(--gold); border-color: white; transform: scale(1.02); }
+        .note-btn .n { font-size: 1.4em; font-weight: bold; color: white; }
+        .note-btn .h { font-size: 0.8em; color: rgba(255,255,255,0.6); }
         .note-btn.active .n, .note-btn.active .h { color: #7b241c; }
 
         #start-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
@@ -116,39 +102,29 @@
 
 <div class="app-container">
     <div id="start-overlay">
-        <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
+        <h1 style="color: var(--gold);">Thai Tuner Smart-Sync</h1>
         <button id="start-btn">เริ่มตั้งสาย</button>
     </div>
 
     <div class="left-panel">
         <section class="instrument-section">
             <svg id="khim-svg" viewBox="0 0 140 85">
-                <!-- ตัวเครื่อง -->
                 <path d="M25,10 L115,10 Q140,10 135,40 Q130,75 115,77 L25,77 Q10,75 5,40 Q0,10 25,10 Z" fill="var(--wood-dark)"/>
                 <path d="M28,13 L112,13 Q132,13 128,40 Q124,70 112,72 L28,72 Q15,70 11,40 Q7,13 28,13 Z" fill="var(--wood-main)"/>
-                
-                <!-- หย่องสีแดง -->
                 <rect x="55" y="15" width="2" height="58" fill="var(--bridge-red)"/> 
                 <rect x="85" y="15" width="2" height="58" fill="var(--bridge-red)"/> 
-
-                <!-- สายขิม -->
+                
                 <g id="strings-group"></g>
-
-                <!-- ไฮไลท์ (Blue Bar) -->
-                <rect id="visual-highlight" class="string-highlight" x="30" y="18" width="15" height="5" rx="2" />
+                
+                <!-- ไฮไลท์ทั้งหมด (เตรียมไว้ทุุกจุด) -->
+                <g id="highlights-group"></g>
             </svg>
         </section>
 
         <section class="tuner-display">
-            <div>
-                <div class="note-display-title" id="display-note">ซอล (สูง)</div>
-                <div class="target-hz-text" id="display-hz-target">755.7 Hz</div>
-            </div>
-
-            <div class="hz-box-container">
-                <div class="live-hz-box" id="live-hz-val">0.0 Hz</div>
-            </div>
-
+            <div class="note-display-title" id="display-note">ซอล (สูง)</div>
+            <div class="target-hz-text" id="display-hz-target">755.7 Hz</div>
+            <div class="hz-box-container"><div class="live-hz-box" id="live-hz-val">0.0 Hz</div></div>
             <div class="scale-area">
                 <div class="scale-labels"><span>-20</span><span>-10</span><span>0</span><span>10</span><span>20</span></div>
                 <div class="scale-ticks"></div>
@@ -168,6 +144,7 @@
 </div>
 
 <script>
+    // ข้อมูลโน้ตที่มีตำแหน่ง X, Y กำกับทุุกตัว
     const noteData = {
         left: [ {n:"ซอล (สูง)", hz:755.7, y:20, x:30}, {n:"ฟาร์", hz:684.4, y:28, x:30}, {n:"มี", hz:619.9, y:36, x:30}, {n:"เร", hz:561.5, y:44, x:30}, {n:"โด", hz:508.5, y:52, x:30}, {n:"ที", hz:460.0, y:60, x:30}, {n:"ลา", hz:417.2, y:68, x:30} ],
         middle: [ {n:"โด", hz:508.5, y:20, x:65}, {n:"ที", hz:460.0, y:28, x:65}, {n:"ลา", hz:417.2, y:36, x:65}, {n:"ซอล", hz:377.8, y:44, x:65}, {n:"ฟาร์", hz:342.2, y:52, x:65}, {n:"มี", hz:309.9, y:60, x:65}, {n:"เร", hz:280.7, y:68, x:65} ],
@@ -178,15 +155,64 @@
     let pitchSamples = [];
     let lastUpdateTime = 0;
 
-    // สร้างสายขิมใน SVG
-    const svgGroup = document.getElementById('strings-group');
-    for(let i=0; i<7; i++) {
-        let y = 20 + (i*8);
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", "12"); line.setAttribute("y1", y);
-        line.setAttribute("x2", "128"); line.setAttribute("y2", y);
-        line.setAttribute("class", "khim-string");
-        svgGroup.appendChild(line);
+    // สร้างสายและไฮไลท์เตรียมไว้
+    function initVisuals() {
+        const svgStrings = document.getElementById('strings-group');
+        const svgHighs = document.getElementById('highlights-group');
+        
+        // สายขิม
+        for(let i=0; i<7; i++) {
+            let y = 20 + (i*8);
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", "12"); line.setAttribute("y1", y); line.setAttribute("x2", "128"); line.setAttribute("y2", y);
+            line.setAttribute("class", "khim-string");
+            svgStrings.appendChild(line);
+        }
+
+        // ไฮไลท์สำหรับทุกตำแหน่งโน้ตในข้อมูล
+        Object.values(noteData).flat().forEach((note, idx) => {
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", note.x);
+            rect.setAttribute("y", note.y - 2.5);
+            rect.setAttribute("width", "15");
+            rect.setAttribute("height", "5");
+            rect.setAttribute("rx", "2");
+            rect.setAttribute("class", "string-highlight");
+            rect.setAttribute("data-hz", note.hz); // ผูกค่า Hz ไว้ตรวจสอบ
+            svgHighs.appendChild(rect);
+        });
+    }
+
+    function updateVisualHighlights(selectedHz) {
+        // อัปเดตจุดบนตัวขิม
+        document.querySelectorAll('.string-highlight').forEach(el => {
+            if (parseFloat(el.getAttribute('data-hz')) === selectedHz) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+
+        // อัปเดตปุ่มในตาราง
+        document.querySelectorAll('.note-btn').forEach(btn => {
+            if (parseFloat(btn.dataset.hz) === selectedHz) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    async function startTuner() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false } });
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            audioContext.createMediaStreamSource(stream).connect(analyser);
+            document.getElementById('start-overlay').style.display = 'none';
+            updateLoop();
+        } catch (e) { alert("กรุณาอนุญาตไมค์ครับ"); }
     }
 
     function yinPitch(buffer, sampleRate) {
@@ -211,33 +237,18 @@
         return tau === -1 ? -1 : sampleRate / tau;
     }
 
-    async function startTuner() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false } });
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            analyser.fftSize = 2048;
-            audioContext.createMediaStreamSource(stream).connect(analyser);
-            document.getElementById('start-overlay').style.display = 'none';
-            updateLoop();
-        } catch (e) { alert("อนุญาตไมค์ก่อนครับ"); }
-    }
-
     function updateLoop(now) {
         const buffer = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buffer);
         const pitch = yinPitch(buffer, audioContext.sampleRate);
-        
         if (pitch > 80 && pitch < 1200) pitchSamples.push(pitch);
 
         if (now - lastUpdateTime > 150) {
             if (pitchSamples.length > 0) {
                 const avgPitch = pitchSamples.reduce((a, b) => a + b) / pitchSamples.length;
                 document.getElementById('live-hz-val').innerText = avgPitch.toFixed(1) + " Hz";
-
                 const diff = avgPitch - targetHz;
-                let needlePos = 50 + (diff * 4); 
-                document.getElementById('needle').style.left = Math.max(5, Math.min(95, needlePos)) + "%";
+                document.getElementById('needle').style.left = Math.max(5, Math.min(95, 50 + (diff * 4))) + "%";
                 pitchSamples = [];
             }
             lastUpdateTime = now;
@@ -250,20 +261,15 @@
         grid.innerHTML = '';
         noteData[currentBridge].forEach(item => {
             const btn = document.createElement('div');
+            // เช็กว่า Hz นี้ตรงกับเป้าหมายปัจจุบันหรือไม่ (ใช้สำหรับไฮไลท์ตัวซ้ำ)
             btn.className = 'note-btn' + (item.hz === targetHz ? ' active' : '');
+            btn.dataset.hz = item.hz;
             btn.innerHTML = `<span class="n">${item.n}</span><span class="h">${item.hz} Hz</span>`;
             btn.onclick = () => {
                 targetHz = item.hz;
                 document.getElementById('display-note').innerText = item.n;
                 document.getElementById('display-hz-target').innerText = item.hz + " Hz";
-                
-                // อัปเดตไฮไลท์บนตัวขิม
-                const high = document.getElementById('visual-highlight');
-                high.setAttribute('x', item.x);
-                high.setAttribute('y', item.y - 2.5);
-                high.classList.add('active');
-
-                renderNotes();
+                updateVisualHighlights(targetHz);
             };
             grid.appendChild(btn);
         });
@@ -279,7 +285,7 @@
     });
 
     document.getElementById('start-btn').onclick = startTuner;
-    window.onload = () => { renderNotes(); document.getElementById('visual-highlight').classList.add('active'); };
+    window.onload = () => { initVisuals(); renderNotes(); updateVisualHighlights(targetHz); };
 </script>
 </body>
 </html>
