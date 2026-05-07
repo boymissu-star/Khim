@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner - ขิม</title>
+    <title>Thai Tuner - ฟังเสียงจริง</title>
     <style>
         :root {
             --bg-dark: #3e332d;
@@ -15,185 +15,110 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             font-family: 'Tahoma', sans-serif;
             background-color: #1a1a1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; color: white;
         }
 
         .app-container {
-            width: 100%;
-            max-width: 400px;
-            height: 100vh; /* ปรับให้เต็มจอไม่มี Header */
+            width: 100%; max-width: 400px; height: 100vh;
             background: var(--bg-cream);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative; display: flex; flex-direction: column;
+            overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        /* ส่วนแสดงรูปขิม - ขยายพื้นที่ขึ้น */
         .instrument-section {
             background: radial-gradient(circle, #f0e6d6 0%, #dcc8ac 100%);
-            padding: 40px 20px;
-            text-align: center;
-            flex: 1.2;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            padding: 40px 20px; text-align: center; flex: 1.2;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
-        .khim-placeholder {
-            width: 90%;
-            max-width: 300px;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
-        }
+        .khim-placeholder { width: 90%; max-width: 300px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3)); }
 
         .instrument-label {
-            background: white;
-            color: var(--bg-dark);
-            padding: 8px 50px;
-            border-radius: 25px;
-            display: inline-block;
-            margin-top: 25px;
-            font-weight: bold;
-            font-size: 1.2em;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            border: 2px solid #bdc3c7;
+            background: white; color: var(--bg-dark);
+            padding: 8px 50px; border-radius: 25px;
+            display: inline-block; margin-top: 25px;
+            font-weight: bold; font-size: 1.2em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 2px solid #bdc3c7;
         }
 
-        /* ส่วนแสดงผล Tuner */
         .tuner-display {
             background: linear-gradient(to bottom, var(--accent-green), var(--accent-blue));
-            padding: 30px 20px;
-            text-align: center;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+            padding: 30px 20px; text-align: center;
         }
 
-        .note-name { 
-            font-size: 1.8em; 
-            margin-bottom: 5px; 
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-        }
-        
-        .frequency { 
-            font-size: 2.5em; 
-            font-weight: bold; 
-            margin-bottom: 5px;
-        }
+        .note-name { font-size: 1.8em; margin-bottom: 5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+        .frequency { font-size: 2.5em; font-weight: bold; margin-bottom: 5px; }
         
         .offset-label {
-            background: var(--gold);
-            color: #7b241c;
-            padding: 4px 25px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 20px;
-            font-weight: bold;
-            font-size: 1.1em;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            background: var(--gold); color: #7b241c;
+            padding: 4px 25px; border-radius: 20px;
+            display: inline-block; margin-bottom: 20px;
+            font-weight: bold; font-size: 1.1em;
         }
 
-        /* หน้าปัดไม้วัด */
         .meter-container {
-            width: 100%;
-            height: 80px;
-            position: relative;
-            background: rgba(0,0,0,0.1);
-            border-radius: 10px;
-            overflow: hidden;
+            width: 100%; height: 80px; position: relative;
+            background: rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden;
         }
 
         .meter-scale {
-            width: 100%;
-            height: 100%;
-            /* สร้างขีดสเกล */
-            background-image: 
-                linear-gradient(90deg, white 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
-            background-size: 20% 40px, 4% 20px;
-            background-repeat: repeat-x;
-            background-position: bottom;
+            width: 100%; height: 100%;
+            background-image: linear-gradient(90deg, white 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
+            background-size: 20% 40px, 4% 20px; background-repeat: repeat-x; background-position: bottom;
         }
 
-        .center-mark {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 2px;
-            height: 100%;
-            background: rgba(255,255,255,0.8);
-            z-index: 1;
-        }
+        .center-mark { position: absolute; top: 0; left: 50%; width: 2px; height: 100%; background: rgba(255,255,255,0.8); z-index: 1; }
 
         .needle {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 5px;
-            height: 60px;
-            background: #ffeb3b;
-            transform: translateX(-50%);
-            border-radius: 5px 5px 0 0;
-            box-shadow: 0 0 15px rgba(255,235,59,1);
-            transition: left 0.15s ease-out;
-            z-index: 2;
+            position: absolute; bottom: 0; left: 50%; width: 5px; height: 60px;
+            background: #ffeb3b; transform: translateX(-50%);
+            border-radius: 5px 5px 0 0; box-shadow: 0 0 15px rgba(255,235,59,1);
+            transition: left 0.1s ease-out; z-index: 2;
         }
 
-        /* ปุ่มเลือกโน้ตด้านล่าง */
-        .note-selector {
-            background-color: var(--bg-red);
-            padding: 40px 10px;
-            display: flex;
-            justify-content: space-around;
-        }
+        .note-selector { background-color: var(--bg-red); padding: 40px 10px; display: flex; justify-content: space-around; }
 
         .note-btn {
-            width: 65px;
-            height: 65px;
-            background: rgba(255,255,255,0.15);
-            transform: rotate(45deg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid rgba(255,255,255,0.4);
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 65px; height: 65px; background: rgba(255,255,255,0.15);
+            transform: rotate(45deg); display: flex; justify-content: center; align-items: center;
+            border: 2px solid rgba(255,255,255,0.4); cursor: pointer;
         }
 
-        .note-btn.active {
-            background: rgba(255,255,255,0.4);
-            border-color: white;
-            box-shadow: 0 0 20px rgba(255,255,255,0.6);
-        }
+        .note-btn.active { background: rgba(255,255,255,0.4); border-color: white; box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+        .note-btn span { transform: rotate(-45deg); font-size: 1em; font-weight: bold; color: white; }
 
-        .note-btn span {
-            transform: rotate(-45deg);
-            font-size: 1em;
-            font-weight: bold;
-            color: white;
+        /* ปุ่มเริ่มใช้งาน */
+        #start-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-
+        #start-btn {
+            padding: 15px 40px; font-size: 1.2em; background: var(--gold);
+            border: none; border-radius: 30px; cursor: pointer; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <div class="app-container">
+        <div id="start-overlay">
+            <button id="start-btn">กดเพื่อเริ่มตั้งสาย</button>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #ccc;">กรุณาอนุญาตให้เข้าถึงไมโครโฟน</p>
+        </div>
+
         <section class="instrument-section">
             <img src="https://cdn-icons-png.flaticon.com/512/3233/3233497.png" alt="Khim" class="khim-placeholder">
             <div class="instrument-label">ขิม</div>
         </section>
 
         <section class="tuner-display">
-            <div class="note-name" id="display-note">ซอล ๓</div>
-            <div class="frequency" id="display-hz">188.9 Hz</div>
+            <div class="note-name" id="display-note">รอรับเสียง...</div>
+            <div class="frequency" id="display-hz">0.0 Hz</div>
             <div class="offset-label" id="offset-hz">0 Hz</div>
             
             <div class="meter-container">
@@ -204,31 +129,81 @@
         </section>
 
         <nav class="note-selector">
-            <div class="note-btn active" onclick="selectNote('ซอล ๓', 188.9)"><span>ซอล ๓</span></div>
-            <div class="note-btn" onclick="selectNote('ลา ๒', 212.5)"><span>ลา ๒</span></div>
-            <div class="note-btn" onclick="selectNote('ที ๒', 239.0)"><span>ที ๒</span></div>
-            <div class="note-btn" onclick="selectNote('โด', 268.6)"><span>โด</span></div>
+            <div class="note-btn active" onclick="setTarget(188.9, 'ซอล ๓')"><span>ซอล ๓</span></div>
+            <div class="note-btn" onclick="setTarget(212.5, 'ลา ๒')"><span>ลา ๒</span></div>
+            <div class="note-btn" onclick="setTarget(239.0, 'ที ๒')"><span>ที ๒</span></div>
+            <div class="note-btn" onclick="setTarget(268.6, 'โด')"><span>โด</span></div>
         </nav>
     </div>
 
+    <script src="https://unpkg.com/pitchy@4.0.0/dist/bundle-pitchy.min.js"></script>
     <script>
-        function selectNote(name, hz) {
-            // อัปเดตสถานะปุ่ม
-            const buttons = document.querySelectorAll('.note-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        let audioContext;
+        let analyser;
+        let targetHz = 188.9;
+        let isListening = false;
 
-            // อัปเดตข้อความหน้าจอ
+        const needle = document.getElementById('needle');
+        const displayHz = document.getElementById('display-hz');
+        const offsetLabel = document.getElementById('offset-hz');
+
+        function setTarget(hz, name) {
+            targetHz = hz;
             document.getElementById('display-note').innerText = name;
-            document.getElementById('display-hz').innerText = hz + " Hz";
+            // จัดการปุ่ม active
+            document.querySelectorAll('.note-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
         }
 
-        // จำลองการขยับของเข็ม (เมื่อเชื่อมไมค์จริง จะใช้ค่าความต่างจากไมค์)
-        setInterval(() => {
-            const needle = document.getElementById('needle');
-            const randomOffset = (Math.random() * 20) - 10; // สุ่มให้แกว่งเบาๆ
-            needle.style.left = `calc(50% + ${randomOffset}px)`;
-        }, 300);
+        async function startTuner() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const source = audioContext.createMediaStreamSource(stream);
+            
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            source.connect(analyser);
+
+            document.getElementById('start-overlay').style.display = 'none';
+            updatePitch();
+        }
+
+        function updatePitch() {
+            const buffer = new Float32Array(analyser.fftSize);
+            analyser.getFloatTimeDomainData(buffer);
+            
+            // ใช้ Pitchy หาความถี่
+            const [pitch, clarity] = Pitchy.findPitch(buffer, audioContext.sampleRate);
+
+            // ถ้าเสียงชัดพอ (Clarity > 0.8) ให้แสดงผล
+            if (clarity > 0.8 && pitch > 50) {
+                const currentHz = pitch.toFixed(1);
+                const diff = (pitch - targetHz).toFixed(1);
+                
+                displayHz.innerText = `${currentHz} Hz`;
+                offsetLabel.innerText = `${diff > 0 ? '+' : ''}${diff} Hz`;
+
+                // คำนวณตำแหน่งเข็ม (คลาดเคลื่อน +- 20Hz ให้เต็มสเกล)
+                let moveX = (diff * 10); // 1Hz = 10px
+                if (moveX > 150) moveX = 150;
+                if (moveX < -150) moveX = -150;
+
+                needle.style.left = `calc(50% + ${moveX}px)`;
+                
+                // เปลี่ยนสีถ้าตรง (ห่างไม่เกิน 0.5 Hz)
+                if (Math.abs(diff) < 0.5) {
+                    offsetLabel.style.background = "#2ecc71"; // สีเขียว
+                } else {
+                    offsetLabel.style.background = "#f1c40f"; // สีทอง
+                }
+            }
+
+            requestAnimationFrame(updatePitch);
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            startTuner().catch(err => alert("ไม่สามารถเข้าถึงไมค์ได้: " + err));
+        });
     </script>
 </body>
 </html>
