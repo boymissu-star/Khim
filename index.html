@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - Filtered Precision</title>
+    <title>ตั้งสายขิม โดย boymissu</title>
     <style>
         :root {
             --wood-dark: #3e2723; --wood-main: #5d4037; --accent-blue: #00f2fe; 
@@ -97,7 +97,7 @@
 
 <div class="app-container">
     <div id="start-overlay">
-        <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
+        <h1 style="color: var(--gold);">ตั้งสายขิม โดย boymissu</h1>
         <p style="color:white">Noise Gate & Filter Activated</p>
         <button id="start-btn">เริ่มตั้งสาย</button>
     </div>
@@ -183,14 +183,13 @@
             });
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             
-            // --- 1. FILTER SETUP (Band-pass) ---
             const filter = audioContext.createBiquadFilter();
             filter.type = 'bandpass';
-            filter.frequency.value = 450; // ศูนย์กลางความถี่ขิม
-            filter.Q.value = 0.5; // ความกว้างของตัวกรอง
+            filter.frequency.value = 450;
+            filter.Q.value = 0.5;
 
             analyser = audioContext.createAnalyser();
-            analyser.fftSize = 4096; // เพิ่มความละเอียด FFT
+            analyser.fftSize = 4096;
             
             const source = audioContext.createMediaStreamSource(stream);
             source.connect(filter);
@@ -201,7 +200,6 @@
         } catch (e) { alert("กรุณาอนุญาตไมค์ครับ"); }
     }
 
-    // --- YIN Algorithm (High Precision) ---
     function yinPitch(buffer, sampleRate) {
         const threshold = 0.15;
         const len = Math.floor(buffer.length / 2);
@@ -228,12 +226,10 @@
         const buffer = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buffer);
         
-        // --- 2. NOISE GATE (RMS) ---
         let rms = 0;
         for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
         rms = Math.sqrt(rms / buffer.length);
 
-        // ถ้าเสียงดังพอ (Gate Open) ค่อยคำนวณ Pitch
         if (rms > 0.015) { 
             const pitch = yinPitch(buffer, audioContext.sampleRate);
             if (pitch > 80 && pitch < 1200) pitchSamples.push(pitch);
@@ -247,12 +243,8 @@
                 const diff = avgPitch - targetHz;
                 document.getElementById('needle').style.left = Math.max(5, Math.min(95, 50 + (diff * 4))) + "%";
                 
-                // Success State: Green Box
                 liveHzBox.classList.toggle('match', Math.abs(diff) < 0.5);
                 pitchSamples = [];
-            } else {
-                // ถ้าไม่มีเสียงนานๆ ให้เคลียร์ค่า (Optional)
-                // liveHzBox.innerText = "0.0 Hz";
             }
             lastUpdateTime = now;
         }
