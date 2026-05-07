@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - Windowed Precision</title>
+    <title>Thai Tuner PRO - Filtered Precision</title>
     <style>
         :root {
             --wood-dark: #3e2723; --wood-main: #5d4037; --accent-blue: #00f2fe; 
@@ -56,19 +56,12 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 2px solid white;
             transition: background-color 0.2s ease;
         }
-        
-        /* รักษาฟีเจอร์: เปลี่ยนสีพื้นหลังกรอบเมื่อตรง HZ */
-        .live-hz-box.match {
-            background-color: var(--success-green) !important;
-            box-shadow: 0 0 20px rgba(0,230,118,0.4);
-            border-color: #ffffff;
-        }
+        .live-hz-box.match { background-color: var(--success-green) !important; }
 
         .scale-area { width: 95%; margin: 10px auto; position: relative; height: 80px; }
         .scale-labels { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1em; color: white; padding: 0 10px; }
         .scale-ticks { width: 100%; height: 30px; margin-top: 5px; background-image: repeating-linear-gradient(90deg, white 0px, white 2px, transparent 2px, transparent 10%); border-bottom: 3px solid white; }
         
-        /* รักษาฟีเจอร์: รูปหมุดเหลือง (Needle Pin) */
         .needle-pin {
             position: absolute; bottom: 0; left: 50%; width: 4px; height: 50px;
             background: #ffeb3b; transform: translateX(-50%);
@@ -91,7 +84,7 @@
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
             border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;
         }
-        .note-btn.active { background: var(--gold); border-color: white; transform: scale(1.02); }
+        .note-btn.active { background: var(--gold); border-color: white; }
         .note-btn .n { font-size: 1.4em; font-weight: bold; color: white; }
         .note-btn .h { font-size: 0.8em; color: rgba(255,255,255,0.6); }
         .note-btn.active .n, .note-btn.active .h { color: #7b241c; }
@@ -105,7 +98,7 @@
 <div class="app-container">
     <div id="start-overlay">
         <h1 style="color: var(--gold);">Thai Tuner PRO</h1>
-        <p style="color:white">Enhanced Precision with Hanning Window</p>
+        <p style="color:white">Noise Gate & Filter Activated</p>
         <button id="start-btn">เริ่มตั้งสาย</button>
     </div>
 
@@ -125,7 +118,6 @@
             <div class="note-display-title" id="display-note">ซอล (สูง)</div>
             <div class="target-hz-text" id="display-hz-target">755.7 Hz</div>
             <div class="hz-box-container">
-                <!-- รักษาฟีเจอร์: แสดงค่า Hz จริง -->
                 <div class="live-hz-box" id="live-hz-val">0.0 Hz</div>
             </div>
             <div class="scale-area">
@@ -175,7 +167,6 @@
         });
     }
 
-    // รักษาฟีเจอร์: Multi-point Highlighting
     function updateVisualHighlights(selectedHz) {
         document.querySelectorAll('.string-highlight').forEach(el => {
             el.classList.toggle('active', parseFloat(el.getAttribute('data-hz')) === selectedHz);
@@ -187,25 +178,30 @@
 
     async function startTuner() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false } });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+            });
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // --- 1. FILTER SETUP (Band-pass) ---
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 450; // ศูนย์กลางความถี่ขิม
+            filter.Q.value = 0.5; // ความกว้างของตัวกรอง
+
             analyser = audioContext.createAnalyser();
-            analyser.fftSize = 2048;
-            audioContext.createMediaStreamSource(stream).connect(analyser);
+            analyser.fftSize = 4096; // เพิ่มความละเอียด FFT
+            
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(filter);
+            filter.connect(analyser);
+
             document.getElementById('start-overlay').style.display = 'none';
             updateLoop();
         } catch (e) { alert("กรุณาอนุญาตไมค์ครับ"); }
     }
 
-    // --- NEW: Hanning Window Function for Smoothing ---
-    function applyHanningWindow(buffer) {
-        const len = buffer.length;
-        for (let i = 0; i < len; i++) {
-            buffer[i] *= 0.5 * (1 - Math.cos(2 * Math.PI * i / (len - 1)));
-        }
-    }
-
-    // --- รักษาฟีเจอร์: YIN Algorithm (High Precision) ---
+    // --- YIN Algorithm (High Precision) ---
     function yinPitch(buffer, sampleRate) {
         const threshold = 0.15;
         const len = Math.floor(buffer.length / 2);
@@ -232,30 +228,31 @@
         const buffer = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buffer);
         
-        // --- Apply Hanning Window to reduce side-lobes ---
-        applyHanningWindow(buffer);
-        
-        const pitch = yinPitch(buffer, audioContext.sampleRate);
-        if (pitch > 80 && pitch < 1200) pitchSamples.push(pitch);
+        // --- 2. NOISE GATE (RMS) ---
+        let rms = 0;
+        for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
+        rms = Math.sqrt(rms / buffer.length);
 
-        // รักษาฟีเจอร์: Stable Reading (Averaging over 150ms)
+        // ถ้าเสียงดังพอ (Gate Open) ค่อยคำนวณ Pitch
+        if (rms > 0.015) { 
+            const pitch = yinPitch(buffer, audioContext.sampleRate);
+            if (pitch > 80 && pitch < 1200) pitchSamples.push(pitch);
+        }
+
         if (now - lastUpdateTime > 150) {
-            const liveHzEl = document.getElementById('live-hz-val');
+            const liveHzBox = document.getElementById('live-hz-val');
             if (pitchSamples.length > 0) {
                 const avgPitch = pitchSamples.reduce((a, b) => a + b) / pitchSamples.length;
-                liveHzEl.innerText = avgPitch.toFixed(1) + " Hz";
-                
+                liveHzBox.innerText = avgPitch.toFixed(1) + " Hz";
                 const diff = avgPitch - targetHz;
                 document.getElementById('needle').style.left = Math.max(5, Math.min(95, 50 + (diff * 4))) + "%";
                 
-                // รักษาฟีเจอร์: Green Box Success State
-                if (Math.abs(diff) < 0.5) {
-                    liveHzEl.classList.add('match');
-                } else {
-                    liveHzEl.classList.remove('match');
-                }
-                
+                // Success State: Green Box
+                liveHzBox.classList.toggle('match', Math.abs(diff) < 0.5);
                 pitchSamples = [];
+            } else {
+                // ถ้าไม่มีเสียงนานๆ ให้เคลียร์ค่า (Optional)
+                // liveHzBox.innerText = "0.0 Hz";
             }
             lastUpdateTime = now;
         }
