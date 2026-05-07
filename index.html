@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Tuner PRO - The Standard</title>
+    <title>Thai Tuner PRO - Green Success</title>
     <style>
         :root {
             --wood-dark: #3e2723; --wood-main: #5d4037; --accent-blue: #00f2fe; 
             --bridge-red: #b71c1c; --gold: #f1c40f; --white: #ffffff;
+            --success-green: #00e676; /* สีเขียวเมื่อเสียงตรง */
         }
 
         body {
@@ -55,10 +56,17 @@
 
         .hz-box-container { margin: 10px 0; }
         .live-hz-box {
-            background: var(--gold); color: #7b241c; 
+            background: var(--gold); color: #7b241c; /* สีเริ่มต้น */
             display: inline-block; min-width: 180px; padding: 12px 25px; 
             border-radius: 12px; font-size: 2.8em; font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 2px solid white;
+            transition: color 0.2s ease;
+        }
+        
+        /* คลาสสีเขียวเมื่อตรง HZ */
+        .live-hz-box.match {
+            color: var(--success-green) !important;
+            text-shadow: 0 0 10px rgba(0,230,118,0.5);
         }
 
         .scale-area { width: 95%; margin: 10px auto; position: relative; height: 80px; }
@@ -120,7 +128,9 @@
         <section class="tuner-display">
             <div class="note-display-title" id="display-note">ซอล (สูง)</div>
             <div class="target-hz-text" id="display-hz-target">755.7 Hz</div>
-            <div class="hz-box-container"><div class="live-hz-box" id="live-hz-val">0.0 Hz</div></div>
+            <div class="hz-box-container">
+                <div class="live-hz-box" id="live-hz-val">0.0 Hz</div>
+            </div>
             <div class="scale-area">
                 <div class="scale-labels"><span>-20</span><span>-10</span><span>0</span><span>10</span><span>20</span></div>
                 <div class="scale-ticks"></div>
@@ -217,11 +227,21 @@
         const pitch = yinPitch(buffer, audioContext.sampleRate);
         if (pitch > 80 && pitch < 1200) pitchSamples.push(pitch);
         if (now - lastUpdateTime > 150) {
+            const liveHzEl = document.getElementById('live-hz-val');
             if (pitchSamples.length > 0) {
                 const avgPitch = pitchSamples.reduce((a, b) => a + b) / pitchSamples.length;
-                document.getElementById('live-hz-val').innerText = avgPitch.toFixed(1) + " Hz";
+                liveHzEl.innerText = avgPitch.toFixed(1) + " Hz";
+                
                 const diff = avgPitch - targetHz;
                 document.getElementById('needle').style.left = Math.max(5, Math.min(95, 50 + (diff * 4))) + "%";
+                
+                // ระบบเปลี่ยนสีเป็นสีเขียวเมื่อตรง HZ (±0.5 Hz)
+                if (Math.abs(diff) < 0.5) {
+                    liveHzEl.classList.add('match');
+                } else {
+                    liveHzEl.classList.remove('match');
+                }
+                
                 pitchSamples = [];
             }
             lastUpdateTime = now;
