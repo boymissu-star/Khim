@@ -159,13 +159,16 @@ function buildStrings() {
   }
 }
 
-// ระบบ Hilight เสียงซ้ำ
+/* ─── แก้ไขเฉพาะระบบ Hilight: เช็คเฉพาะความถี่ที่เท่ากันเท่านั้น ─── */
 function syncHilight(name, hz) {
   document.querySelectorAll('.string-hl').forEach(el => {
     const elHz = parseFloat(el.getAttribute('data-hz'));
-    const elNote = el.getAttribute('data-note');
-    const isMatch = (Math.abs(elHz - hz) <= 0.2) || (elNote === name);
-    el.style.opacity = isMatch ? 0.9 : 0;
+    
+    // จับคู่เฉพาะค่าความถี่ที่ตรงกัน (Tolerance 0.2 Hz) 
+    // ไม่เช็คชื่อโน้ต เพื่อป้องกันการ Hilight โน้ตชื่อเดียวกันแต่คนละ Octave
+    const isHzMatch = Math.abs(elHz - hz) <= 0.2;
+    
+    el.style.opacity = isHzMatch ? 0.9 : 0;
   });
 }
 
