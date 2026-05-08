@@ -1,103 +1,249 @@
-<div class="khim-panel">
-    <svg id="khim-svg" viewBox="0 0 160 100">
-        <path d="M22,15 L138,15 Q162,15 157,48 Q152,86 138,88 L22,88 Q7,86 3,48 Q-2,15 22,15Z" fill="#2d1f14" stroke="#1a110a" stroke-width="1"/>
-        
-        <rect id="bridge-l" x="55" y="18" width="3" height="68" rx="1" fill="#b71c1c"/>
-        <rect id="bridge-r" x="102" y="18" width="3" height="68" rx="1" fill="#b71c1c"/>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ตั้งสายขิม · Boymissu Pro (Full Strings)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0e; --panel: #161616; --surface: #1f1f1f; --border: #2a2a2a;
+  --accent: #d4a849; --cyan: #00f2fe; --green: #4caf7d; --text: #e8e0d0; --muted: #6b6558;
+  --mono: 'IBM Plex Mono', monospace; --thai: 'Sarabun', sans-serif; --display: 'Bebas Neue', sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+body { font-family: var(--thai); background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-        <g id="khim-visual-group"></g>
-        
-        <text x="30" y="12" font-family="Sarabun" font-size="5" fill="#888">นอก</text>
-        <text x="75" y="12" font-family="Sarabun" font-size="5" fill="#888">กลาง</text>
-        <text x="120" y="12" font-family="Sarabun" font-size="5" fill="#888">ใน</text>
+/* --- OVERLAY --- */
+#overlay { position: fixed; inset: 0; z-index: 999; background: #0e0e0eee; backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.overlay-title { font-family: var(--display); font-size: 4rem; color: var(--accent); }
+#start-btn { font-family: var(--display); font-size: 1.4rem; padding: 16px 52px; background: var(--accent); border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; }
+
+/* --- LAYOUT --- */
+.top-section { flex: 1; display: flex; min-height: 0; }
+.khim-panel { flex: 1; background: #1a1610; display: flex; align-items: center; justify-content: center; padding: 10px; border-right: 1px solid var(--border); }
+#khim-svg { width: 100%; max-width: 450px; height: auto; }
+.meter-panel { width: 180px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 15px; border-right: 1px solid var(--border); }
+
+/* --- UI COMPONENTS --- */
+.ring-meter { position: relative; width: 100px; height: 100px; }
+.ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.08s ease-out; }
+.note-hz { font-family: var(--mono); font-size: 1.8rem; font-weight: 600; }
+.needle-bar-wrap { background: var(--panel); border-top: 1px solid var(--border); padding: 8px 16px; }
+.needle-bar { position: relative; height: 24px; background: var(--surface); border-radius: 30px; overflow: hidden; }
+.needle-el { position: absolute; top: 2px; bottom: 2px; width: 4px; border-radius: 10px; background: var(--accent); left: 50%; transform: translateX(-50%); transition: left 0.08s ease-out; }
+
+/* --- CONTROLS --- */
+.main-right { flex: 0 0 320px; display: flex; flex-direction: column; background: var(--panel); }
+.tabs { display: flex; background: var(--bg); }
+.tab { flex: 1; padding: 12px; text-align: center; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); cursor: pointer; }
+.tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.note-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 10px; }
+.note-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 8px 2px; text-align: center; cursor: pointer; }
+.note-btn.active { background: rgba(0, 242, 254, 0.1); border-color: var(--cyan); }
+.note-btn-name { font-size: 0.85rem; font-weight: 600; display: block; }
+.note-btn-hz { font-family: var(--mono); font-size: 0.55rem; color: var(--muted); }
+
+@media (max-width: 699px) {
+  body { flex-direction: column; }
+  .top-section { height: 40vh; }
+  .main-right { flex: 1; }
+  .meter-panel { width: 130px; }
+}
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div class="overlay-title">ขิม TUNER</div>
+  <button id="start-btn">เริ่มใช้งาน</button>
+</div>
+
+<div class="top-section">
+  <div class="khim-panel">
+    <svg id="khim-svg" viewBox="0 0 160 100">
+      <path d="M25,18 L135,18 Q155,18 150,48 Q145,82 135,84 L25,84 Q15,82 10,48 Q5,18 25,18Z" fill="#3d2b1a" stroke="#221105" stroke-width="1.5"/>
+      
+      <line id="bridge-no-l" x1="35" y1="20" x2="35" y2="82" stroke="#8b4513" stroke-width="2.5" opacity="0.8"/> <line id="bridge-1" x1="72" y1="20" x2="72" y2="82" stroke="#b71c1c" stroke-width="2.5"/> <line id="bridge-2" x1="102" y1="20" x2="102" y2="82" stroke="#b71c1c" stroke-width="2.5"/> <line id="bridge-no-r" x1="138" y1="20" x2="138" y2="82" stroke="#8b4513" stroke-width="2.5" opacity="0.8"/> <g id="strings-container"></g>
+
+      <text x="35" y="15" font-family="Sarabun" font-size="4" fill="#666" text-anchor="middle">No</text>
+      <text x="72" y="15" font-family="Sarabun" font-size="4" fill="#666" text-anchor="middle">1</text>
+      <text x="102" y="15" font-family="Sarabun" font-size="4" fill="#666" text-anchor="middle">2</text>
+      <text x="138" y="15" font-family="Sarabun" font-size="4" fill="#666" text-anchor="middle">No</text>
     </svg>
+  </div>
+
+  <div class="meter-panel">
+    <div style="text-align:center">
+      <div id="note-name" style="color:var(--muted); font-size:0.8rem">—</div>
+      <div id="live-hz" class="note-hz">---</div>
+    </div>
+    <div class="ring-meter">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--surface)" stroke-width="8" transform="rotate(-210 50 50)"/>
+        <circle id="ring-arc" class="ring-fill" cx="50" cy="50" r="38" stroke-dasharray="239.4" stroke-dashoffset="239.4" stroke="var(--accent)" transform="rotate(-210 50 50)"/>
+      </svg>
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div id="cent-val" style="font-family:var(--mono); font-size:1.2rem; font-weight:600">±0</div>
+      </div>
+    </div>
+    <div id="dir-badge" style="font-size:0.6rem; background:var(--surface); padding:4px 8px; border-radius:4px; color:var(--muted); width:100%; text-align:center;">รอสัญญาณ</div>
+    <div style="text-align:center; font-size:0.7rem; color:var(--accent); font-family:var(--mono)" id="target-hz">508.5 Hz</div>
+  </div>
+</div>
+
+<div class="main-right">
+  <div class="needle-bar-wrap">
+    <div class="needle-bar">
+      <div id="needle" class="needle-el"></div>
+    </div>
+  </div>
+  <div class="control-section">
+    <div class="tabs">
+      <div class="tab" id="tab-left" onclick="setBridge('left')">นอก</div>
+      <div class="tab active" id="tab-middle" onclick="setBridge('middle')">กลาง</div>
+      <div class="tab" id="tab-right" onclick="setBridge('right')">ใน</div>
+    </div>
+    <div id="note-grid" class="note-grid"></div>
+  </div>
 </div>
 
 <script>
-/* ── ส่วนที่ 2: ฟังก์ชันสำหรับวาดสายและระบบ Hilight (นำไปแทนที่ของเดิม) ── */
+/* ─── AUDIO ENGINE (KEEP ORIGINAL) ─── */
+const CONFIG = { RMS_MOBILE: 0.018, RMS_DESKTOP: 0.010, FFT_MOBILE: 2048, FFT_DESKTOP: 4096, BUFFER: 7, IN_TUNE: 5 };
+const hzData = {
+  left: [754.6, 683.4, 618.9, 560.5, 507.6, 459.7, 416.3],
+  middle: [508.5, 460.5, 417.0, 377.6, 342.0, 309.7, 280.5],
+  right: [342.0, 309.7, 280.5, 254.0, 230.0, 208.3, 188.6]
+};
+const noteNames = {
+  left: ["ซอล", "ฟาร์", "มี", "เร", "โด", "ที", "ลา"],
+  middle: ["โด", "ที", "ลา", "ซอล", "ฟาร์", "มี", "เร"],
+  right: ["ฟาร์", "มี", "เร", "โด", "ที", "ลา", "ซอล"]
+};
 
+let audioCtx, analyser, sr, isMobile, isRunning = false;
+let target = 508.5, bridge = 'middle', pitchBuffer = [];
+
+/* ─── VISUAL LOGIC (NEW STRINGS & BRIDGES) ─── */
 function buildStrings() {
-    const group = document.getElementById('khim-visual-group');
-    group.innerHTML = '';
+    const container = document.getElementById('strings-container');
+    container.innerHTML = '';
     
-    // วาดสายขิมทั้งหมด 7 แถว (ตามจำนวนโน้ตในแต่ละหย่อง)
+    // วาดสายแนวนอน 7 แถว (ตามกลุ่มโน้ต)
     for (let i = 0; i < 7; i++) {
-        const y = 25 + (i * 9); // ระยะห่างระหว่างสาย
+        const y = 28 + (i * 8.5);
         
-        // วาดสายเส้นบางๆ เป็นพื้นหลัง
-        const mainLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        mainLine.setAttribute('x1', '10'); mainLine.setAttribute('y1', y);
-        mainLine.setAttribute('x2', '150'); mainLine.setAttribute('y2', y);
-        mainLine.setAttribute('stroke', '#4a3520'); mainLine.setAttribute('stroke-width', '0.4');
-        group.appendChild(mainLine);
+        // สายแนวนอนเส้นยาว (พาดผ่านทุกหย่อง)
+        const stringLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        stringLine.setAttribute('x1', '20'); stringLine.setAttribute('y1', y);
+        stringLine.setAttribute('x2', '150'); stringLine.setAttribute('y2', y);
+        stringLine.setAttribute('stroke', '#a67c52'); stringLine.setAttribute('stroke-width', '0.4');
+        stringLine.setAttribute('opacity', '0.6');
+        container.appendChild(stringLine);
 
-        // สร้างตำแหน่ง Hilight สำหรับ 3 ช่วง (นอก, กลาง, ใน)
-        const sections = [
-            { id: 'left', x1: 10, x2: 55 },
-            { id: 'middle', x1: 58, x2: 102 },
-            { id: 'right', x1: 105, x2: 150 }
+        // สร้างพื้นที่ Hilight (แบ่งเป็น 3 ช่วง ระหว่างหย่อง)
+        const segments = [
+            { id: 'left', x1: 35, x2: 72 },   // ช่วง นอก (หย่อง No-L ถึง หย่อง 1)
+            { id: 'middle', x1: 72, x2: 102 }, // ช่วง กลาง (หย่อง 1 ถึง หย่อง 2)
+            { id: 'right', x1: 102, x2: 138 }  // ช่วง ใน (หย่อง 2 ถึง หย่อง No-R)
         ];
 
-        sections.forEach(sec => {
+        segments.forEach(seg => {
             const hl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            hl.setAttribute('id', `hl-${sec.id}-${i}`);
-            hl.setAttribute('x', sec.x1);
-            hl.setAttribute('y', y - 2.5);
-            hl.setAttribute('width', sec.x2 - sec.x1);
-            hl.setAttribute('height', '5');
-            hl.setAttribute('rx', '2');
-            hl.setAttribute('fill', '#00f2fe'); // สีฟ้าสว่างตามแบบ
-            hl.setAttribute('opacity', '0');     // ปิดไว้ก่อน
-            hl.setAttribute('style', 'transition: opacity 0.2s; filter: drop-shadow(0 0 3px #00f2fe);');
-            hl.classList.add('khim-highlight');
-            group.appendChild(hl);
+            hl.setAttribute('id', `hl-${seg.id}-${i}`);
+            hl.setAttribute('x', seg.x1);
+            hl.setAttribute('y', y - 2);
+            hl.setAttribute('width', seg.x2 - seg.x1);
+            hl.setAttribute('height', '4');
+            hl.setAttribute('rx', '1.5');
+            hl.setAttribute('fill', 'var(--cyan)');
+            hl.setAttribute('opacity', '0');
+            hl.setAttribute('style', 'transition: opacity 0.2s; filter: drop-shadow(0 0 2px var(--cyan));');
+            hl.classList.add('khim-hl');
+            container.appendChild(hl);
         });
     }
 }
 
-// ระบบ Hilight อัจฉริยะ: เช็คเสียงที่ซ้ำกันในหย่องอื่นด้วย
 function highlightString(targetHz) {
-    // 1. ปิด Hilight ทั้งหมดก่อน
-    document.querySelectorAll('.khim-highlight').forEach(el => {
-        el.style.opacity = '0';
-    });
-
-    // 2. ค้นหาความถี่ที่ตรงกันในทุกหย่อง
+    document.querySelectorAll('.khim-hl').forEach(el => el.style.opacity = '0');
     for (const b in hzData) {
         hzData[b].forEach((hz, idx) => {
-            // เช็คว่าความถี่ตรงกับที่เลือกหรือไม่ (ยอมรับค่าต่างได้เล็กน้อยเผื่อทศนิยม)
             if (Math.abs(hz - targetHz) < 1.0) {
-                const hlEl = document.getElementById(`hl-${b}-${idx}`);
-                if (hlEl) {
-                    hlEl.style.opacity = '1';
-                }
+                const el = document.getElementById(`hl-${b}-${idx}`);
+                if (el) el.style.opacity = '0.9';
             }
         });
     }
 }
 
-/* ── ส่วนที่ 3: ปรับปรุงฟังก์ชัน renderGrid เล็กน้อยเพื่อให้เรียกใช้ Hilight ตัวใหม่ ── */
+/* ─── UI & CONTROL LOGIC ─── */
 function renderGrid() {
-    const g = document.getElementById('note-grid');
-    g.innerHTML = '';
+    const g = document.getElementById('note-grid'); g.innerHTML = '';
     noteNames[bridge].forEach((n, i) => {
         const h = hzData[bridge][i];
-        const oct = octaveLabels[bridge][i];
         const btn = document.createElement('div');
-        btn.className = `note-btn${Math.abs(h - target) < 0.1 ? ' active' : ''}`;
-        btn.innerHTML = `<span class="note-btn-name">${n}<small style="font-size:0.6rem;opacity:0.5;margin-left:3px">${oct}</small></span><span class="note-btn-hz">${h} Hz</span>`;
+        btn.className = `note-btn ${Math.abs(h - target) < 0.1 ? 'active' : ''}`;
+        btn.innerHTML = `<span class="note-btn-name">${n}</span><span class="note-btn-hz">${h} Hz</span>`;
         btn.onclick = () => {
-            target = h;
-            targetName = n;
+            target = h; pitchBuffer = [];
             document.getElementById('note-name').innerText = n;
             document.getElementById('target-hz').innerText = h + ' Hz';
-            pitchBuffer = [];
-            updateNeedle(0);
-            renderGrid();
-            // เรียกใช้ฟังก์ชัน Hilight โดยส่งค่า Hz ไปเช็คตัวซ้ำ
-            highlightString(h); 
+            renderGrid(); highlightString(h);
         };
         g.appendChild(btn);
     });
 }
-</script>
+
+function setBridge(b) {
+    bridge = b;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-'+b).classList.add('active');
+    renderGrid();
+}
+
+/* ─── AUDIO ENGINE LOGIC (KEEP ORIGINAL) ─── */
+async function startApp() {
+    try {
+        isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: !isMobile, noiseSuppression: !isMobile, autoGainControl: false } });
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        sr = audioCtx.sampleRate;
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = isMobile ? CONFIG.FFT_MOBILE : CONFIG.FFT_DESKTOP;
+        audioCtx.createMediaStreamSource(stream).connect(analyser);
+        document.getElementById('overlay').style.display = 'none';
+        isRunning = true; highlightString(target); tick();
+    } catch(e) { alert('Mic Access Denied'); }
+}
+
+function tick() {
+    if(!isRunning) return;
+    const buf = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(buf);
+    const pitch = isMobile ? getPitchAMDF(buf) : getPitchYIN(buf);
+    if (pitch > 0 && pitch > target*0.5 && pitch < target*2) {
+        pitchBuffer.push(pitch);
+        if(pitchBuffer.length > CONFIG.BUFFER) pitchBuffer.shift();
+        const median = [...pitchBuffer].sort((a,b)=>a-b)[Math.floor(pitchBuffer.length/2)];
+        updateUI(median);
+    }
+    requestAnimationFrame(tick);
+}
+
+function getPitchYIN(buf) {
+    const thresh = 0.1, size = buf.length, half = size/2;
+    let rms = 0; for(let i=0; i<size; i++) rms += buf[i]*buf[i];
+    if(Math.sqrt(rms/size) < CONFIG.RMS_DESKTOP) return -1;
+    const yin = new Float32Array(half); let sum = 0; yin[0] = 1;
+    for(let t=1; t<half; t++) {
+        let d = 0; for(let i=0; i<half; i++) { let del = buf[i]-buf[i+t]; d += del*del; }
+        yin[t] = d; sum += d; yin[t] *= t/sum;
+    }
+    let tau = 2; 
+    while(tau < half) { if(yin[tau] < thresh) { while(tau+1 < half && yin[tau+1] < yin[tau]) tau++; break; } tau++; }
+    if(tau === half || yin[tau] >= thresh) return -1;
+    const s0 = yin[tau-1], s1 = yin[tau], s2 = yin[tau+1];
+    return sr / (tau + (s2-s0)/(2*(2*s1-s2-s0)));
