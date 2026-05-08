@@ -9,73 +9,51 @@
 <style>
 :root {
   --bg: #0e0e0e; --panel: #161616; --surface: #1f1f1f; --border: #2a2a2a;
-  --accent: #d4a849; --accent2: #c08030; --flat: #c2b280; --sharp: #5b8fcc;
-  --green: #4caf7d; --red: #e05555; --text: #e8e0d0; --muted: #6b6558;
+  --accent: #d4a849; --green: #4caf7d; --text: #e8e0d0; --muted: #6b6558;
   --mono: 'IBM Plex Mono', monospace; --thai: 'Sarabun', sans-serif; --display: 'Bebas Neue', sans-serif;
+  --sharp: #5b8fcc; --flat: #c2b280;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; margin: 0; padding: 0; }
 body { font-family: var(--thai); background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
 /* ─── OVERLAY ─────────────────────────────────── */
 #overlay { position: fixed; inset: 0; z-index: 999; background: #0e0e0eee; backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.overlay-title { font-family: var(--display); font-size: clamp(3rem, 10vw, 6rem); letter-spacing: 0.08em; color: var(--accent); line-height: 1; }
-.overlay-sub { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.25em; text-transform: uppercase; margin-top: 6px; margin-bottom: 40px; }
-#start-btn { font-family: var(--display); font-size: 1.4rem; letter-spacing: 0.15em; padding: 16px 52px; background: var(--accent); color: #0e0e0e; border: none; border-radius: 4px; cursor: pointer; }
-#device-tag { margin-top: 20px; font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; }
+.overlay-title { font-family: var(--display); font-size: clamp(3rem, 10vw, 6rem); color: var(--accent); line-height: 1; }
+#start-btn { font-family: var(--display); font-size: 1.4rem; padding: 16px 52px; background: var(--accent); border: none; cursor: pointer; margin-top: 20px; }
 
 /* ─── LAYOUT ─────────────────────────────────── */
 .top-section { flex: 1; display: flex; min-height: 0; }
 .khim-panel { flex: 1; background: #1a1610; display: flex; align-items: center; justify-content: center; padding: 16px; border-right: 1px solid var(--border); }
-#khim-svg { width: 100%; max-width: 380px; height: auto; }
+#khim-svg { width: 100%; max-width: 400px; height: auto; }
 
-/* ─── METER PANEL ─────────────────────────────── */
-.meter-panel { width: 200px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 12px; border-right: 1px solid var(--border); flex-shrink: 0; }
-.note-thai { font-family: var(--thai); font-size: 1rem; font-weight: 300; color: var(--muted); letter-spacing: 0.1em; }
-.note-hz { font-family: var(--mono); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; transition: color 0.2s; }
-.ring-meter { position: relative; width: 130px; height: 130px; }
+.meter-panel { width: 200px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 12px; border-right: 1px solid var(--border); }
+.note-hz { font-family: var(--mono); font-size: 2rem; font-weight: 600; line-height: 1; }
+.ring-meter { position: relative; width: 120px; height: 120px; }
 .ring-bg { fill: none; stroke: var(--surface); stroke-width: 8; }
-.ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.08s ease-out, stroke 0.2s; }
+.ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.1s; }
 .ring-center-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.cent-value { font-family: var(--mono); font-size: 1.4rem; font-weight: 600; transition: color 0.2s; line-height: 1; }
-.direction-badge { font-family: var(--mono); font-size: 0.65rem; padding: 5px 14px; border-radius: 3px; background: var(--surface); color: var(--muted); width: 100%; text-align: center; }
-.direction-badge.flat { background: rgba(91,143,204,0.15); color: var(--sharp); }
-.direction-badge.sharp { background: rgba(192,128,48,0.15); color: var(--flat); }
-.direction-badge.in-tune { background: rgba(76,175,125,0.15); color: var(--green); }
-.target-hz-val { font-family: var(--mono); font-size: 1rem; font-weight: 600; color: var(--accent); }
 
-/* ─── NEEDLE BAR ─────────────────────────────── */
-.needle-bar-wrap { background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 16px; }
-.needle-bar { position: relative; height: 32px; background: var(--surface); border-radius: 3px; overflow: hidden; }
-.needle-el { position: absolute; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--accent); left: 50%; transform: translateX(-50%); transition: left 0.08s ease-out; box-shadow: 0 0 8px rgba(212,168,73,0.5); }
-.needle-labels { display: flex; justify-content: space-between; padding: 4px 2px 0; font-family: var(--mono); font-size: 0.55rem; color: var(--muted); }
-
-/* ─── CONTROL SECTION ─────────────────────────── */
-.control-section { height: 42vh; background: var(--panel); display: flex; flex-direction: column; overflow: hidden; }
+/* ─── CONTROL ─────────────────────────────────── */
+.control-section { height: 42vh; background: var(--panel); display: flex; flex-direction: column; }
 .tabs { display: flex; background: var(--bg); border-bottom: 1px solid var(--border); }
-.tab { flex: 1; padding: 13px; text-align: center; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); cursor: pointer; text-transform: uppercase; }
+.tab { flex: 1; padding: 13px; text-align: center; color: var(--muted); cursor: pointer; }
 .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
 .note-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px; }
-.note-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 6px; text-align: center; cursor: pointer; user-select: none; }
-.note-btn.active { background: rgba(212,168,73,0.12); border-color: var(--accent); }
-.note-btn-name { font-family: var(--thai); font-size: 0.85rem; font-weight: 600; color: var(--text); display: block; }
-.note-btn-hz { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); display: block; }
-.status-bar { padding: 6px 14px; display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-.status-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.note-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 6px; text-align: center; cursor: pointer; }
+.note-btn.active { background: rgba(212,168,73,0.15); border-color: var(--accent); }
 
-@media (min-width: 700px) {
-  body { flex-direction: row; }
-  .meter-panel { border-right: 1px solid var(--border); }
-  .main-right { flex: 0 0 340px; display: flex; flex-direction: column; height: 100%; }
-  .control-section { flex: 1; }
-}
+/* Needle Bar */
+.needle-bar-wrap { background: var(--panel); border-top: 1px solid var(--border); padding: 10px; }
+.needle-bar { position: relative; height: 20px; background: var(--surface); border-radius: 10px; overflow: hidden; }
+.needle-el { position: absolute; top: 0; bottom: 0; width: 4px; background: var(--accent); left: 50%; transform: translateX(-50%); transition: left 0.1s; }
+
+@media (min-width: 700px) { body { flex-direction: row; } .main-right { flex: 0 0 340px; display: flex; flex-direction: column; } }
 </style>
 </head>
 <body>
 
 <div id="overlay">
   <div class="overlay-title">ขิม TUNER</div>
-  <div class="overlay-sub">Boymissu Pro · Global Sync Mode</div>
   <button id="start-btn">เริ่มใช้งาน</button>
 </div>
 
@@ -93,28 +71,26 @@ body { font-family: var(--thai); background: var(--bg); color: var(--text); heig
 
   <div class="meter-panel">
     <div style="text-align:center">
-      <div class="note-thai" id="note-name">— เลือกสาย —</div>
+      <div id="note-name" style="color:var(--muted)">—</div>
       <div class="note-hz" id="live-hz">---</div>
     </div>
     <div class="ring-meter">
       <svg viewBox="0 0 100 100">
-        <circle class="ring-bg" cx="50" cy="50" r="38" transform="rotate(-210 50 50)"/>
-        <circle id="ring-arc" class="ring-fill" cx="50" cy="50" r="38" stroke-dasharray="239.4" stroke-dashoffset="239.4" stroke="var(--accent)" transform="rotate(-210 50 50)"/>
+        <circle class="ring-bg" cx="50" cy="50" r="38"/>
+        <circle id="ring-arc" class="ring-fill" cx="50" cy="50" r="38" stroke-dasharray="238.76" stroke-dashoffset="238.76" stroke="var(--accent)" transform="rotate(-90 50 50)"/>
       </svg>
       <div class="ring-center-text">
         <div class="cent-value" id="cent-val">±0</div>
-        <div style="font-size:0.5rem; color:var(--muted)">CENT</div>
       </div>
     </div>
-    <div class="direction-badge" id="dir-badge">รอสัญญาณ</div>
-    <div style="text-align:center"><div id="target-hz" class="target-hz-val">508.5 Hz</div></div>
+    <div id="dir-badge" style="font-size:0.7rem; color:var(--muted)">WAITING</div>
+    <div id="target-hz" style="color:var(--accent); font-weight:600">---</div>
   </div>
 </div>
 
 <div class="main-right" style="display:contents">
   <div class="needle-bar-wrap">
     <div class="needle-bar"><div class="needle-el" id="needle"></div></div>
-    <div class="needle-labels"><span>-50¢</span><span>0</span><span>+50¢</span></div>
   </div>
   <div class="control-section">
     <div class="tabs">
@@ -123,18 +99,15 @@ body { font-family: var(--thai); background: var(--bg); color: var(--text); heig
       <div class="tab" id="tab-right" onclick="setBridge('right')">ใน</div>
     </div>
     <div id="note-grid" class="note-grid"></div>
-    <div class="status-bar">
-      <div class="status-dot" id="status-dot"></div>
-      <div id="status-text" class="status-text" style="font-size:0.6rem; color:var(--muted)">READY</div>
-    </div>
   </div>
 </div>
 
 <script>
+// เปลี่ยนเฉพาะค่า Hz ตามที่ระบุใหม่
 const hzData = {
-  left: [754.6, 683.4, 618.9, 560.5, 507.6, 459.7, 416.3],
-  middle: [508.5, 460.5, 417.0, 377.6, 342.0, 309.7, 280.5],
-  right: [342.0, 309.7, 280.5, 254.0, 230.0, 208.3, 188.6]
+  left: [755.7, 684.4, 619.9, 561.5, 508.5, 460.5, 416.3], // สาย 7 ใช้ค่าเดิมจากความสัมพันธ์เสียง
+  middle: [508.5, 460.6, 417.2, 377.8, 342.2, 309.9, 280.7],
+  right: [342.2, 309.9, 280.7, 254.2, 230.3, 208.5, 188.9]
 };
 const noteNames = {
   left: ["ซอล", "ฟาร์", "มี", "เร", "โด", "ที", "ลา"],
@@ -142,9 +115,8 @@ const noteNames = {
   right: ["ฟาร์", "มี", "เร", "โด", "ที", "ลา", "ซอล"]
 };
 
-let audioCtx, analyser, sr, isRunning = false;
-let target = 508.5, bridge = 'middle';
-let pitchBuffer = [];
+let target = 508.5, targetName = "โด", bridge = 'middle';
+let isRunning = false;
 
 function setBridge(b) {
   bridge = b;
@@ -158,14 +130,14 @@ function renderGrid() {
   noteNames[bridge].forEach((n, i) => {
     const h = hzData[bridge][i];
     const btn = document.createElement('div');
-    btn.className = `note-btn ${Math.abs(h - target) < 0.1 ? 'active' : ''}`;
-    btn.innerHTML = `<span class="note-btn-name">${n}</span><span class="note-btn-hz">${h} Hz</span>`;
+    btn.className = `note-btn ${h === target ? 'active' : ''}`;
+    btn.innerHTML = `<div style="font-weight:600">${n}</div><div style="font-size:0.6rem">${h}</div>`;
     btn.onclick = () => {
-      target = h; 
+      target = h; targetName = n;
       document.getElementById('note-name').innerText = n;
-      document.getElementById('target-hz').innerText = h + ' Hz';
+      document.getElementById('target-hz').innerText = h + " Hz";
       renderGrid(); 
-      syncHilightByHz(h); // เปลี่ยนมาใช้การ Sync ด้วยความถี่แทน ID
+      syncAllMatches(n, h); 
     };
     g.appendChild(btn);
   });
@@ -175,11 +147,16 @@ function buildStrings() {
   const sg = document.getElementById('strings-svg'); sg.innerHTML = '';
   for (let i = 0; i < 7; i++) {
     const y = 28 + (i * 8.5);
-    const zones = [{id:'left', x1:35, x2:72}, {id:'middle', x1:72, x2:102}, {id:'right', x1:102, x2:138}];
+    const zones = [
+      {id:'left', x1:35, x2:72}, 
+      {id:'middle', x1:72, x2:102}, 
+      {id:'right', x1:102, x2:138}
+    ];
     zones.forEach(z => {
       const hl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       hl.setAttribute('class', 'string-hl');
-      hl.setAttribute('data-hz', hzData[z.id][i]); // เก็บค่า Hz ไว้ที่ตัว Object เลย
+      hl.setAttribute('data-note', noteNames[z.id][i]);
+      hl.setAttribute('data-hz', hzData[z.id][i]);
       hl.setAttribute('x', z.x1); hl.setAttribute('y', y-1.5);
       hl.setAttribute('width', z.x2-z.x1); hl.setAttribute('height', 3);
       hl.setAttribute('fill', 'var(--accent)'); hl.setAttribute('opacity', 0);
@@ -188,49 +165,47 @@ function buildStrings() {
   }
 }
 
-// ฟังก์ชันใหม่: สั่งเปิดไฟทุกจุดที่มีค่า Hz ตรงกับที่เลือก
-function syncHilightByHz(hz) {
+// คำนวณ Highlight ใหม่: ตรวจจับเสียงซ้ำที่ค่า Hz ใกล้กันมาก (เช่น 508.5)
+function syncAllMatches(name, hz) {
   document.querySelectorAll('.string-hl').forEach(el => {
-    const val = parseFloat(el.getAttribute('data-hz'));
-    // ถ้าความถี่ห่างกันไม่เกิน 0.5 Hz ให้ถือว่าเป็นตัวเดียวกันและเปิดไฟ
-    el.style.opacity = Math.abs(val - hz) < 0.5 ? 0.9 : 0;
+    const elHz = parseFloat(el.getAttribute('data-hz'));
+    const elNote = el.getAttribute('data-note');
+    
+    // เน้นเช็คที่ค่าความถี่เป็นหลัก (Hz Match) เพราะเป็นค่าที่แน่นอนที่สุดของเสียงซ้ำ
+    // ใช้ค่าต่างไม่เกิน 0.2 Hz เพื่อให้ 460.5 และ 460.6 ติดพร้อมกันได้
+    const hzMatch = Math.abs(elHz - hz) <= 0.2;
+    const nameMatch = (elNote === name);
+
+    el.style.opacity = (hzMatch || nameMatch) ? 0.9 : 0;
   });
 }
 
 async function startApp() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    sr = audioCtx.sampleRate;
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
-    audioCtx.createMediaStreamSource(stream).connect(analyser);
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('status-dot').classList.add('active');
-    isRunning = true; syncHilightByHz(target); tick();
-  } catch(e) { alert('Mic Error'); }
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const audioCtx = new AudioContext();
+  const analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 2048;
+  audioCtx.createMediaStreamSource(stream).connect(analyser);
+  document.getElementById('overlay').style.display = 'none';
+  isRunning = true;
+  syncAllMatches(targetName, target);
+
+  const tick = () => {
+    const buf = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(buf);
+    const pitch = getPitch(buf, audioCtx.sampleRate);
+    if (pitch > 0 && Math.abs(1200 * Math.log2(pitch/target)) < 100) {
+      updateUI(pitch);
+    }
+    requestAnimationFrame(tick);
+  };
+  tick();
 }
 
-function tick() {
-  if (!isRunning) return;
-  const buf = new Float32Array(analyser.fftSize);
-  analyser.getFloatTimeDomainData(buf);
-  const pitch = getPitchAMDF(buf);
-  if (pitch > 0 && pitch > target * 0.5 && pitch < target * 2) {
-    pitchBuffer.push(pitch);
-    if (pitchBuffer.length > 5) pitchBuffer.shift();
-    updateUI(pitchBuffer[pitchBuffer.length-1]);
-  }
-  requestAnimationFrame(tick);
-}
-
-function getPitchAMDF(buf) {
-  const size = buf.length/2;
-  let rms = 0; for(let i=0; i<size; i++) rms += buf[i]*buf[i];
-  if(Math.sqrt(rms/size) < 0.01) return -1;
+function getPitch(buf, sr) {
   let minSum = Infinity, bestTau = -1;
   for(let t=Math.round(sr/1100); t<Math.round(sr/80); t++) {
-    let s = 0; for(let i=0; i<size; i++) s += Math.abs(buf[i]-buf[i+t]);
+    let s = 0; for(let i=0; i<buf.length/2; i++) s += Math.abs(buf[i]-buf[i+t]);
     if(s < minSum) { minSum = s; bestTau = t; }
   }
   return sr/bestTau;
@@ -238,16 +213,12 @@ function getPitchAMDF(buf) {
 
 function updateUI(p) {
   const cents = 1200 * Math.log2(p/target);
-  const clamped = Math.max(-50, Math.min(50, cents));
   document.getElementById('live-hz').innerText = p.toFixed(1);
   document.getElementById('cent-val').innerText = (cents>0?'+':'')+Math.round(cents);
-  const arc = document.getElementById('ring-arc');
-  arc.style.strokeDashoffset = 239.4 - (239.4 * 0.7 * (Math.abs(clamped)/50));
-  let color = Math.abs(cents) < 5 ? 'var(--green)' : (cents < 0 ? 'var(--sharp)' : 'var(--flat)');
-  arc.style.stroke = color;
-  document.getElementById('live-hz').style.color = color;
-  document.getElementById('needle').style.left = (50 + (clamped*0.9)) + '%';
-  document.getElementById('dir-badge').innerText = Math.abs(cents) < 5 ? '✓ ตรงแล้ว' : (cents < 0 ? '▼ ต่ำไป' : '▲ สูงไป');
+  document.getElementById('needle').style.left = (50 + (Math.max(-50, Math.min(50, cents))*0.9)) + '%';
+  const color = Math.abs(cents) < 5 ? 'var(--green)' : (cents < 0 ? 'var(--sharp)' : 'var(--flat)');
+  document.getElementById('ring-arc').style.stroke = color;
+  document.getElementById('ring-arc').style.strokeDashoffset = 238.76 - (238.76 * (Math.abs(cents)/50));
 }
 
 window.onload = () => { buildStrings(); renderGrid(); };
