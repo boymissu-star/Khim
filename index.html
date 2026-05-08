@@ -101,7 +101,6 @@ body { font-family: var(--thai); background: var(--bg); color: var(--text); heig
 </div>
 
 <script>
-// อัพเดตเฉพาะค่า Hz ใหม่ตามสั่ง
 const hzData = {
   left: [755.7, 684.4, 619.9, 561.5, 508.5, 460.5, 417.2],
   middle: [508.5, 460.6, 417.2, 377.8, 342.2, 309.9, 280.7],
@@ -114,6 +113,22 @@ const noteNames = {
 };
 
 let target = 508.5, targetName = "โด", bridge = 'middle', isRunning = false;
+let audioCtx;
+
+// ฟังก์ชันสร้างเสียงความถี่ (แก้ไขเวลาเป็น 2 วินาที)
+function playTone(freq) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2); // แก้เป็น 2 วินาที
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 2); // แก้เป็น 2 วินาที
+}
 
 function setBridge(b) {
   bridge = b;
@@ -134,7 +149,8 @@ function renderGrid() {
       document.getElementById('note-name').innerText = n;
       document.getElementById('target-hz').innerText = h + " Hz";
       renderGrid(); 
-      syncHilight(h); // ส่งเฉพาะค่า Hz ไปเช็ค
+      syncHilight(h);
+      playTone(h);
     };
     g.appendChild(btn);
   });
@@ -157,11 +173,9 @@ function buildStrings() {
   }
 }
 
-// เช็คเฉพาะค่า Hz ที่เท่ากันเท่านั้น (ไม่เช็คชื่อโน้ต)
 function syncHilight(hz) {
   document.querySelectorAll('.string-hl').forEach(el => {
     const elHz = parseFloat(el.getAttribute('data-hz'));
-    // เช็คค่า Hz ที่ตรงกันในช่วง 0.2 Hz เพื่อเก็บเสียงซ้ำใน Octave เดียวกัน
     const isHzMatch = Math.abs(elHz - hz) <= 0.2;
     el.style.opacity = isHzMatch ? 0.9 : 0;
   });
@@ -170,7 +184,7 @@ function syncHilight(hz) {
 async function startApp() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
     audioCtx.createMediaStreamSource(stream).connect(analyser);
