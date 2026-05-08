@@ -11,6 +11,7 @@
   --bg: #0e0e0e; --panel: #161616; --surface: #1f1f1f; --border: #2a2a2a;
   --accent: #d4a849; --accent2: #c08030; --flat: #c2b280; --sharp: #5b8fcc;
   --green: #4caf7d; --red: #e05555; --text: #e8e0d0; --muted: #6b6558;
+  --yellow: #f1c40f; /* เพิ่มตัวแปรสีเหลือง */
   --mono: 'IBM Plex Mono', monospace; --thai: 'Sarabun', sans-serif; --display: 'Bebas Neue', sans-serif;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; margin: 0; padding: 0; }
@@ -115,7 +116,6 @@ const noteNames = {
 let target = 508.5, targetName = "โด", bridge = 'middle', isRunning = false;
 let audioCtx;
 
-// ฟังก์ชันสร้างเสียงความถี่ (แก้ไขเวลาเป็น 2 วินาที)
 function playTone(freq) {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
@@ -123,11 +123,11 @@ function playTone(freq) {
   osc.type = 'sine';
   osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
   gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2); // แก้เป็น 2 วินาที
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
   osc.start();
-  osc.stop(audioCtx.currentTime + 2); // แก้เป็น 2 วินาที
+  osc.stop(audioCtx.currentTime + 2);
 }
 
 function setBridge(b) {
@@ -211,12 +211,27 @@ function getPitch(buf, sr) {
   return sr/bestTau;
 }
 
+// แก้ไขฟังก์ชันแสดงผลสีตามระยะห่าง Hz
 function updateUI(p) {
+  const diff = Math.abs(p - target);
   const cents = 1200 * Math.log2(p/target);
   const clamped = Math.max(-50, Math.min(50, cents));
-  document.getElementById('live-hz').innerText = p.toFixed(1);
+  
+  const liveHzEl = document.getElementById('live-hz');
+  liveHzEl.innerText = p.toFixed(1);
+  
+  // เปลี่ยนสีตัวเลขความถี่ตามเงื่อนไข
+  if (diff <= 5) {
+    liveHzEl.style.color = 'var(--green)';
+  } else if (diff <= 20) {
+    liveHzEl.style.color = 'var(--yellow)';
+  } else {
+    liveHzEl.style.color = 'var(--text)'; // สีเดิม
+  }
+
   document.getElementById('cent-val').innerText = (cents>0?'+':'')+Math.round(cents);
   document.getElementById('needle').style.left = (50 + (clamped*0.9)) + '%';
+  
   const color = Math.abs(cents) < 5 ? 'var(--green)' : (cents < 0 ? 'var(--sharp)' : 'var(--flat)');
   document.getElementById('ring-arc').style.stroke = color;
   document.getElementById('ring-arc').style.strokeDashoffset = 239.4 - (239.4 * 0.7 * (Math.abs(clamped)/50));
