@@ -3,197 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Boymissu Khim Tuner</title>
+<title>ตั้งสายขิม · Boymissu Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #1a1610; --panel: #161616; --surface: #1f1f1f; --border: #2a2a2a;
-  --accent: #d4a849; --cyan: #00f2fe; --green: #4caf7d; --text: #e8e0d0; --muted: #6b6558;
+  --bg: #0e0e0e; --panel: #161616; --surface: #1f1f1f; --border: #2a2a2a;
+  --accent: #d4a849; --accent2: #c08030; --flat: #c2b280; --sharp: #5b8fcc;
+  --green: #4caf7d; --red: #e05555; --text: #e8e0d0; --muted: #6b6558;
+  --mono: 'IBM Plex Mono', monospace; --thai: 'Sarabun', sans-serif; --display: 'Bebas Neue', sans-serif;
 }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; margin: 0; padding: 0; }
+body { font-family: var(--thai); background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* Overlay สำหรับแก้ปัญหารันไม่ได้ */
-#overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-.overlay-content { text-align: center; }
-.overlay-title { font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: var(--accent); margin-bottom: 10px; }
-#start-btn { font-family: 'Bebas Neue', cursive; font-size: 1.5rem; padding: 15px 50px; background: var(--accent); border: none; border-radius: 8px; cursor: pointer; color: #000; box-shadow: 0 0 20px rgba(212,168,73,0.4); }
+/* ─── OVERLAY ─────────────────────────────────── */
+#overlay { position: fixed; inset: 0; z-index: 999; background: #0e0e0eee; backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.overlay-title { font-family: var(--display); font-size: clamp(3rem, 10vw, 6rem); letter-spacing: 0.08em; color: var(--accent); line-height: 1; }
+.overlay-sub { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.25em; text-transform: uppercase; margin-top: 6px; margin-bottom: 40px; }
+#start-btn { font-family: var(--display); font-size: 1.4rem; letter-spacing: 0.15em; padding: 16px 52px; background: var(--accent); color: #0e0e0e; border: none; border-radius: 4px; cursor: pointer; }
+#device-tag { margin-top: 20px; font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; }
 
-/* Layout */
-.main-container { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.khim-view { flex: 1.2; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; }
-#khim-svg { width: 100%; max-width: 500px; height: auto; }
+/* ─── LAYOUT ─────────────────────────────────── */
+.top-section { flex: 1; display: flex; min-height: 0; }
+.khim-panel { flex: 1; background: #1a1610; display: flex; align-items: center; justify-content: center; padding: 16px; border-right: 1px solid var(--border); }
+#khim-svg { width: 100%; max-width: 380px; height: auto; }
 
-.controls-view { flex: 1; background: var(--panel); display: flex; flex-direction: column; border-top: 1px solid var(--border); }
-.tabs { display: flex; background: #000; }
-.tab { flex: 1; padding: 15px; text-align: center; color: var(--muted); cursor: pointer; font-weight: 600; font-size: 0.9rem; }
-.tab.active { color: var(--accent); border-bottom: 3px solid var(--accent); background: var(--panel); }
+/* ─── METER PANEL ─────────────────────────────── */
+.meter-panel { width: 200px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 12px; border-right: 1px solid var(--border); flex-shrink: 0; }
+.note-thai { font-family: var(--thai); font-size: 1rem; font-weight: 300; color: var(--muted); letter-spacing: 0.1em; }
+.note-hz { font-family: var(--mono); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; transition: color 0.2s; }
+.ring-meter { position: relative; width: 130px; height: 130px; }
+.ring-bg { fill: none; stroke: var(--surface); stroke-width: 8; }
+.ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.08s ease-out, stroke 0.2s; }
+.ring-center-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cent-value { font-family: var(--mono); font-size: 1.4rem; font-weight: 600; transition: color 0.2s; line-height: 1; }
+.direction-badge { font-family: var(--mono); font-size: 0.65rem; padding: 5px 14px; border-radius: 3px; background: var(--surface); color: var(--muted); width: 100%; text-align: center; }
+.direction-badge.flat { background: rgba(91,143,204,0.15); color: var(--sharp); }
+.direction-badge.sharp { background: rgba(192,128,48,0.15); color: var(--flat); }
+.direction-badge.in-tune { background: rgba(76,175,125,0.15); color: var(--green); }
+.target-hz-val { font-family: var(--mono); font-size: 1rem; font-weight: 600; color: var(--accent); }
 
-.note-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 15px; }
-.note-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 5px; text-align: center; cursor: pointer; }
-.note-btn.active { border-color: var(--cyan); background: rgba(0, 242, 254, 0.1); }
-.note-btn-name { display: block; font-weight: 600; font-size: 1rem; }
-.note-btn-hz { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: var(--muted); }
+/* ─── NEEDLE BAR ─────────────────────────────── */
+.needle-bar-wrap { background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 16px; }
+.needle-bar { position: relative; height: 32px; background: var(--surface); border-radius: 3px; overflow: hidden; }
+.needle-el { position: absolute; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--accent); left: 50%; transform: translateX(-50%); transition: left 0.08s ease-out; box-shadow: 0 0 8px rgba(212,168,73,0.5); }
+.needle-labels { display: flex; justify-content: space-between; padding: 4px 2px 0; font-family: var(--mono); font-size: 0.55rem; color: var(--muted); }
 
-/* Meter */
-.meter-info { position: absolute; top: 20px; right: 20px; text-align: right; }
-.hz-display { font-family: 'IBM Plex Mono', monospace; font-size: 1.5rem; font-weight: 600; color: var(--cyan); }
+/* ─── CONTROL SECTION ─────────────────────────── */
+.control-section { height: 42vh; background: var(--panel); display: flex; flex-direction: column; overflow: hidden; }
+.tabs { display: flex; background: var(--bg); border-bottom: 1px solid var(--border); }
+.tab { flex: 1; padding: 13px; text-align: center; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); cursor: pointer; text-transform: uppercase; }
+.tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.note-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px; }
+.note-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 6px; text-align: center; cursor: pointer; user-select: none; }
+.note-btn.active { background: rgba(212,168,73,0.12); border-color: var(--accent); }
+.note-btn-name { font-family: var(--thai); font-size: 0.85rem; font-weight: 600; color: var(--text); display: block; }
+.note-btn-hz { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); display: block; }
+.status-bar { padding: 6px 14px; display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.status-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+@media (min-width: 700px) {
+  body { flex-direction: row; }
+  .meter-panel { border-right: 1px solid var(--border); }
+  .main-right { flex: 0 0 340px; display: flex; flex-direction: column; height: 100%; }
+  .control-section { flex: 1; }
+}
+@media (max-width: 699px) {
+  .top-section { height: 38vh; }
+  .meter-panel { width: 140px; }
+  .ring-meter { width: 100px; height: 100px; }
+}
 </style>
 </head>
 <body>
 
 <div id="overlay">
-    <div class="overlay-content">
-        <div class="overlay-title">KHIM TUNER PRO</div>
-        <button id="start-btn">เริ่มใช้งาน (Start)</button>
-        <p style="margin-top:15px; color:var(--muted); font-size:0.8rem;">กรุณาอนุญาตการเข้าถึงไมโครโฟน</p>
-    </div>
+  <div class="overlay-title">ขิม TUNER</div>
+  <div class="overlay-sub">Boymissu Pro · YIN Algorithm</div>
+  <button id="start-btn">เริ่มใช้งาน</button>
+  <div id="device-tag">ตรวจจับอุปกรณ์...</div>
 </div>
 
-<div class="main-container">
-    <div class="khim-view">
-        <div class="meter-info">
-            <div id="note-display" style="font-size: 0.8rem; color: var(--muted);">โน้ตที่เลือก</div>
-            <div id="live-hz" class="hz-display">0.0 Hz</div>
-        </div>
-        
-        <svg id="khim-svg" viewBox="0 0 160 100">
-            <path d="M25,20 L135,20 Q155,20 150,50 Q145,82 135,85 L25,85 Q15,82 10,50 Q5,20 25,20Z" fill="#3d2b1a" stroke="#221105" stroke-width="1.5"/>
-            <line x1="35" y1="22" x2="35" y2="83" stroke="#8b4513" stroke-width="2" opacity="0.6"/> <line x1="72" y1="22" x2="72" y2="83" stroke="#b71c1c" stroke-width="2.5"/> <line x1="102" y1="22" x2="102" y2="83" stroke="#b71c1c" stroke-width="2.5"/> <line x1="138" y1="22" x2="138" y2="83" stroke="#8b4513" stroke-width="2" opacity="0.6"/> <g id="strings-group"></g>
-        </svg>
-    </div>
+<div class="top-section">
+  <div class="khim-panel">
+    <svg id="khim-svg" viewBox="0 0 160 100">
+      <path d="M25,18 L135,18 Q155,18 150,48 Q145,82 135,84 L25,84 Q15,82 10,48 Q5,18 25,18Z" fill="#3d2b1a" stroke="#221105" stroke-width="1.5"/>
+      
+      <line x1="35" y1="20" x2="35" y2="82" stroke="#8b4513" stroke-width="2" opacity="0.6"/> 
+      <line x1="72" y1="20" x2="72" y2="82" stroke="#b71c1c" stroke-width="2.5"/> 
+      <line x1="102" y1="20" x2="102" y2="82" stroke="#b71c1c" stroke-width="2.5"/> 
+      <line x1="138" y1="20" x2="138" y2="82" stroke="#8b4513" stroke-width="2" opacity="0.6"/>
 
-    <div class="controls-view">
-        <div class="tabs">
-            <div class="tab" id="tab-left" onclick="changeBridge('left')">หย่องนอก</div>
-            <div class="tab active" id="tab-middle" onclick="changeBridge('middle')">หย่องกลาง</div>
-            <div class="tab" id="tab-right" onclick="changeBridge('right')">หย่องใน</div>
-        </div>
-        <div id="note-grid" class="note-grid"></div>
+      <g id="strings-svg"></g>
+
+      <text x="35" y="15" font-family="Sarabun" font-size="4" fill="#c2a060" text-anchor="middle" opacity="0.8">นอก</text>
+      <text x="87" y="15" font-family="Sarabun" font-size="4" fill="#c2a060" text-anchor="middle" opacity="0.8">กลาง</text>
+      <text x="138" y="15" font-family="Sarabun" font-size="4" fill="#c2a060" text-anchor="middle" opacity="0.8">ใน</text>
+    </svg>
+  </div>
+
+  <div class="meter-panel">
+    <div style="text-align:center">
+      <div class="note-thai" id="note-name">— เลือกสาย —</div>
+      <div class="note-hz" id="live-hz">---</div>
     </div>
+    <div class="ring-meter">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="38" transform="rotate(-210 50 50)"/>
+        <circle id="ring-arc" class="ring-fill" cx="50" cy="50" r="38" stroke-dasharray="239.4" stroke-dashoffset="239.4" stroke="var(--accent)" transform="rotate(-210 50 50)"/>
+      </svg>
+      <div class="ring-center-text">
+        <div class="cent-value" id="cent-val">±0</div>
+        <div style="font-size:0.5rem; color:var(--muted)">CENT</div>
+      </div>
+    </div>
+    <div class="direction-badge" id="dir-badge">รอสัญญาณ</div>
+    <div style="text-align:center"><div id="target-hz" class="target-hz-val">508.5 Hz</div></div>
+  </div>
+</div>
+
+<div class="main-right" style="display:contents">
+  <div class="needle-bar-wrap">
+    <div class="needle-bar"><div class="needle-el" id="needle"></div></div>
+    <div class="needle-labels"><span>-50¢</span><span>0</span><span>+50¢</span></div>
+  </div>
+  <div class="control-section">
+    <div class="tabs">
+      <div class="tab" id="tab-left" onclick="setBridge('left')">นอก</div>
+      <div class="tab active" id="tab-middle" onclick="setBridge('middle')">กลาง</div>
+      <div class="tab" id="tab-right" onclick="setBridge('right')">ใน</div>
+    </div>
+    <div id="note-grid" class="note-grid"></div>
+    <div class="status-bar">
+      <div class="status-dot" id="status-dot"></div>
+      <div id="status-text" class="status-text" style="font-size:0.6rem; color:var(--muted)">กดเริ่มใช้งาน</div>
+    </div>
+  </div>
 </div>
 
 <script>
-// ข้อมูลความถี่ (คงเดิมตามที่คุณต้องการ)
+const CONFIG = { RMS_MOBILE: 0.018, RMS_DESKTOP: 0.010, FFT_MOBILE: 2048, FFT_DESKTOP: 4096, BUFFER: 7, IN_TUNE: 5 };
 const hzData = {
-    left: [754.6, 683.4, 618.9, 560.5, 507.6, 459.7, 416.3],
-    middle: [508.5, 460.5, 417.0, 377.6, 342.0, 309.7, 280.5],
-    right: [342.0, 309.7, 280.5, 254.0, 230.0, 208.3, 188.6]
+  left: [754.6, 683.4, 618.9, 560.5, 507.6, 459.7, 416.3],
+  middle: [508.5, 460.5, 417.0, 377.6, 342.0, 309.7, 280.5],
+  right: [342.0, 309.7, 280.5, 254.0, 230.0, 208.3, 188.6]
 };
 const noteNames = {
-    left: ["ซอล", "ฟาร์", "มี", "เร", "โด", "ที", "ลา"],
-    middle: ["โด", "ที", "ลา", "ซอล", "ฟาร์", "มี", "เร"],
-    right: ["ฟาร์", "มี", "เร", "โด", "ที", "ลา", "ซอล"]
+  left: ["ซอล", "ฟาร์", "มี", "เร", "โด", "ที", "ลา"],
+  middle: ["โด", "ที", "ลา", "ซอล", "ฟาร์", "มี", "เร"],
+  right: ["ฟาร์", "มี", "เร", "โด", "ที", "ลา", "ซอล"]
 };
 
-let currentBridge = 'middle';
-let targetHz = 508.5;
-let audioCtx, analyser;
+let audioCtx, analyser, sr, isMobile, isRunning = false;
+let target = 508.5, bridge = 'middle';
+let pitchBuffer = [];
 
-// สร้างสายขิมและระบบ Hilight
-function initKhim() {
-    const group = document.getElementById('strings-group');
-    group.innerHTML = '';
-    for (let i = 0; i < 7; i++) {
-        const y = 29 + (i * 8.4);
-        // วาดสายหลัก
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', '22'); line.setAttribute('y1', y);
-        line.setAttribute('x2', '148'); line.setAttribute('y2', y);
-        line.setAttribute('stroke', '#a67c52'); line.setAttribute('stroke-width', '0.3');
-        group.appendChild(line);
-
-        // พื้นที่ Hilight (3 ช่วง)
-        const zones = [
-            { id: 'left', x1: 35, x2: 72 },
-            { id: 'middle', x1: 72, x2: 102 },
-            { id: 'right', x1: 102, x2: 138 }
-        ];
-        zones.forEach(z => {
-            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('id', `hl-${z.id}-${i}`);
-            rect.setAttribute('x', z.x1); rect.setAttribute('y', y - 2);
-            rect.setAttribute('width', z.x2 - z.x1); rect.setAttribute('height', '4');
-            rect.setAttribute('rx', '1'); rect.setAttribute('fill', 'var(--cyan)');
-            rect.setAttribute('opacity', '0');
-            rect.style.transition = 'opacity 0.2s';
-            group.appendChild(rect);
-        });
-    }
-}
-
-function updateHighlight() {
-    document.querySelectorAll('[id^="hl-"]').forEach(el => el.style.opacity = '0');
-    for (const b in hzData) {
-        hzData[b].forEach((hz, idx) => {
-            if (Math.abs(hz - targetHz) < 1.0) {
-                const el = document.getElementById(`hl-${b}-${idx}`);
-                if (el) el.style.opacity = '0.9';
-            }
-        });
-    }
+function setBridge(b) {
+  bridge = b;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + b).classList.add('active');
+  renderGrid();
 }
 
 function renderGrid() {
-    const grid = document.getElementById('note-grid');
-    grid.innerHTML = '';
-    noteNames[currentBridge].forEach((name, i) => {
-        const hz = hzData[currentBridge][i];
-        const btn = document.createElement('div');
-        btn.className = `note-btn ${Math.abs(hz - targetHz) < 0.1 ? 'active' : ''}`;
-        btn.innerHTML = `<span class="note-btn-name">${name}</span><span class="note-btn-hz">${hz} Hz</span>`;
-        btn.onclick = () => {
-            targetHz = hz;
-            document.getElementById('note-display').innerText = `ตั้งสาย: ${name}`;
-            renderGrid();
-            updateHighlight();
-        };
-        grid.appendChild(btn);
+  const g = document.getElementById('note-grid'); g.innerHTML = '';
+  noteNames[bridge].forEach((n, i) => {
+    const h = hzData[bridge][i];
+    const btn = document.createElement('div');
+    btn.className = `note-btn ${Math.abs(h - target) < 0.1 ? 'active' : ''}`;
+    btn.innerHTML = `<span class="note-btn-name">${n}</span><span class="note-btn-hz">${h} Hz</span>`;
+    btn.onclick = () => {
+      target = h; pitchBuffer = [];
+      document.getElementById('note-name').innerText = n;
+      document.getElementById('target-hz').innerText = h + ' Hz';
+      renderGrid(); highlightString(bridge, i);
+    };
+    g.appendChild(btn);
+  });
+}
+
+function buildStrings() {
+  const sg = document.getElementById('strings-svg'); sg.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const y = 28 + (i * 8.5);
+    // วาดเส้นสายหลัก (Horizontal lines)
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', '20'); line.setAttribute('y1', y);
+    line.setAttribute('x2', '150'); line.setAttribute('y2', y);
+    line.setAttribute('stroke', '#7a6040'); line.setAttribute('stroke-width', '0.4');
+    line.setAttribute('opacity', '0.5');
+    sg.appendChild(line);
+
+    // สร้าง Highlight segments (Left, Middle, Right)
+    const zones = [{id:'left', x1:35, x2:72}, {id:'middle', x1:72, x2:102}, {id:'right', x1:102, x2:138}];
+    zones.forEach(z => {
+      const hl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      hl.setAttribute('id', `hl-${z.id}-${i}`);
+      hl.setAttribute('x', z.x1); hl.setAttribute('y', y-2);
+      hl.setAttribute('width', z.x2-z.x1); hl.setAttribute('height', 4);
+      hl.setAttribute('fill', 'var(--accent)'); hl.setAttribute('opacity', 0);
+      hl.style.transition = 'opacity 0.2s';
+      sg.appendChild(hl);
     });
+  }
 }
 
-function changeBridge(b) {
-    currentBridge = b;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + b).classList.add('active');
-    renderGrid();
+function highlightString(b, idx) {
+  document.querySelectorAll('[id^="hl-"]').forEach(el => el.style.opacity = 0);
+  const el = document.getElementById(`hl-${b}-${idx}`);
+  if (el) el.style.opacity = 0.8;
 }
 
-// ฟังก์ชันเริ่ม Audio (สำคัญมากสำหรับการรันบนเว็บ)
-async function startAudio() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 2048;
-        const source = audioCtx.createMediaStreamSource(stream);
-        source.connect(analyser);
-        
-        document.getElementById('overlay').style.display = 'none';
-        updateHighlight();
-        processAudio();
-    } catch (err) {
-        alert("กรุณาเปิดไมโครโฟนเพื่อใช้งาน");
-    }
+async function startApp() {
+  try {
+    isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    sr = audioCtx.sampleRate;
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = isMobile ? CONFIG.FFT_MOBILE : CONFIG.FFT_DESKTOP;
+    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('status-dot').classList.add('active');
+    isRunning = true; highlightString(bridge, 0); tick();
+  } catch(e) { alert('Mic Access Denied'); }
 }
 
-function processAudio() {
-    const data = new Float32Array(analyser.fftSize);
-    analyser.getFloatTimeDomainData(data);
-    
-    // ตรงนี้คือจุดที่อัลกอริทึม YIN/AMDF เดิมของคุณจะทำงาน
-    // เพื่อความกระชับ ผมจะข้ามตัว Logic คำนวณเสียงที่คุณมีอยู่แล้ว (ห้ามแก้ส่วนนั้น)
-    // แต่ให้มั่นใจว่าเรียก updateUI() เมื่อได้ความถี่ครับ
-    
-    requestAnimationFrame(processAudio);
+function tick() {
+  if (!isRunning) return;
+  const buf = new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(buf);
+  const pitch = isMobile ? getPitchAMDF(buf) : getPitchYIN(buf);
+  if (pitch > 0 && pitch > target * 0.5 && pitch < target * 2) {
+    pitchBuffer.push(pitch);
+    if (pitchBuffer.length > CONFIG.BUFFER) pitchBuffer.shift();
+    const median = [...pitchBuffer].sort((a,b)=>a-b)[Math.floor(pitchBuffer.length/2)];
+    updateUI(median);
+  }
+  requestAnimationFrame(tick);
 }
 
-window.onload = () => {
-    initKhim();
-    renderGrid();
-};
+function getPitchYIN(buf) {
+  const thresh = 0.1, size = buf.length, half = size/2;
+  let rms = 0; for(let i=0; i<size; i++) rms += buf[i]*buf[i];
+  if(Math.sqrt(rms/size) < CONFIG.RMS_DESKTOP) return -1;
+  const yin = new Float32Array(half); let sum = 0; yin[0] = 1;
+  for(let t=1; t<half; t++) {
+    let d = 0; for(let i=0; i<half; i++) { let del = buf[i]-buf[i+t]; d += del*del; }
+    yin[t] = d; sum += d; yin[t] *= t/sum;
+  }
+  let tau = 2; while(tau < half) { if(yin[tau] < thresh) { while(tau+1 < half && yin[tau+1] < yin[tau]) tau++; break; } tau++; }
+  return (tau === half || yin[tau] >= thresh) ? -1 : sr / tau;
+}
 
-document.getElementById('start-btn').addEventListener('click', startAudio);
+function getPitchAMDF(buf) {
+  const size = buf.length/2;
+  let rms = 0; for(let i=0; i<size; i++) rms += buf[i]*buf[i];
+  if(Math.sqrt(rms/size) < CONFIG.RMS_MOBILE) return -1;
+  let minSum = Infinity, bestTau = -1;
+  for(let t=Math.round(sr/1100); t<Math.round(sr/80); t++) {
+    let s = 0; for(let i=0; i<size; i++) s += Math.abs(buf[i]-buf[i+t]);
+    if(s < minSum) { minSum = s; bestTau = t; }
+  }
+  return sr/bestTau;
+}
+
+function updateUI(p) {
+  const cents = 1200 * Math.log2(p/target);
+  const clamped = Math.max(-50, Math.min(50, cents));
+  document.getElementById('live-hz').innerText = p.toFixed(1);
+  document.getElementById('cent-val').innerText = (cents>0?'+':'')+Math.round(cents);
+  const arc = document.getElementById('ring-arc');
+  arc.style.strokeDashoffset = 239.4 - (239.4 * 0.7 * (Math.abs(clamped)/50));
+  let color = 'var(--accent)', badge = 'รอสัญญาณ';
+  if(Math.abs(cents) <= CONFIG.IN_TUNE) { color = 'var(--green)'; badge = '✓ ตรงแล้ว'; }
+  else if(cents < 0) { color = 'var(--sharp)'; badge = '▼ ต่ำไป'; }
+  else { color = 'var(--flat)'; badge = '▲ สูงไป'; }
+  arc.style.stroke = color;
+  document.getElementById('live-hz').style.color = color;
+  document.getElementById('needle').style.left = (50 + (clamped*0.9)) + '%';
+  document.getElementById('dir-badge').innerText = badge;
+  document.getElementById('dir-badge').className = 'direction-badge ' + (cents < -5 ? 'flat' : cents > 5 ? 'sharp' : 'in-tune');
+}
+
+window.onload = () => { buildStrings(); renderGrid(); };
+document.getElementById('start-btn').addEventListener('click', startApp);
 </script>
 </body>
 </html>
