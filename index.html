@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-/* ─── UI เดิมของคุณทั้งหมด 100% ─── */
 :root {
   --bg: #0e0e0e; --panel: #161616; --surface: #1f1f1f; --border: #2a2a2a;
   --accent: #d4a849; --accent2: #c08030; --flat: #c2b280; --sharp: #5b8fcc;
@@ -102,9 +101,9 @@ body { font-family: var(--thai); background: var(--bg); color: var(--text); heig
 </div>
 
 <script>
-// แก้ไขเฉพาะ Hz ตามคำสั่งคุณ
+// อัพเดตเฉพาะค่า Hz ใหม่ตามสั่ง
 const hzData = {
-  left: [755.7, 684.4, 619.9, 561.5, 508.5, 460.5, 416.3],
+  left: [755.7, 684.4, 619.9, 561.5, 508.5, 460.5, 417.2],
   middle: [508.5, 460.6, 417.2, 377.8, 342.2, 309.9, 280.7],
   right: [342.2, 309.9, 280.7, 254.2, 230.3, 208.5, 188.9]
 };
@@ -135,7 +134,7 @@ function renderGrid() {
       document.getElementById('note-name').innerText = n;
       document.getElementById('target-hz').innerText = h + " Hz";
       renderGrid(); 
-      syncHilight(n, h);
+      syncHilight(h); // ส่งเฉพาะค่า Hz ไปเช็ค
     };
     g.appendChild(btn);
   });
@@ -149,7 +148,6 @@ function buildStrings() {
     zones.forEach(z => {
       const hl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       hl.setAttribute('class', 'string-hl');
-      hl.setAttribute('data-note', noteNames[z.id][i]);
       hl.setAttribute('data-hz', hzData[z.id][i]);
       hl.setAttribute('x', z.x1); hl.setAttribute('y', y-1.5);
       hl.setAttribute('width', z.x2-z.x1); hl.setAttribute('height', 3);
@@ -159,15 +157,12 @@ function buildStrings() {
   }
 }
 
-/* ─── แก้ไขเฉพาะระบบ Hilight: เช็คเฉพาะความถี่ที่เท่ากันเท่านั้น ─── */
-function syncHilight(name, hz) {
+// เช็คเฉพาะค่า Hz ที่เท่ากันเท่านั้น (ไม่เช็คชื่อโน้ต)
+function syncHilight(hz) {
   document.querySelectorAll('.string-hl').forEach(el => {
     const elHz = parseFloat(el.getAttribute('data-hz'));
-    
-    // จับคู่เฉพาะค่าความถี่ที่ตรงกัน (Tolerance 0.2 Hz) 
-    // ไม่เช็คชื่อโน้ต เพื่อป้องกันการ Hilight โน้ตชื่อเดียวกันแต่คนละ Octave
+    // เช็คค่า Hz ที่ตรงกันในช่วง 0.2 Hz เพื่อเก็บเสียงซ้ำใน Octave เดียวกัน
     const isHzMatch = Math.abs(elHz - hz) <= 0.2;
-    
     el.style.opacity = isHzMatch ? 0.9 : 0;
   });
 }
@@ -181,7 +176,7 @@ async function startApp() {
     audioCtx.createMediaStreamSource(stream).connect(analyser);
     document.getElementById('overlay').style.display = 'none';
     isRunning = true;
-    syncHilight(targetName, target);
+    syncHilight(target);
     const tick = () => {
       const buf = new Float32Array(analyser.fftSize);
       analyser.getFloatTimeDomainData(buf);
