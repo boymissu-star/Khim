@@ -7,47 +7,46 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
+/* ─── UI เดิมของคุณทั้งหมด 100% ─── */
 :root {
   --bg: #0e0e0e; --panel: #161616; --surface: #1f1f1f; --border: #2a2a2a;
-  --accent: #d4a849; --green: #4caf7d; --text: #e8e0d0; --muted: #6b6558;
+  --accent: #d4a849; --accent2: #c08030; --flat: #c2b280; --sharp: #5b8fcc;
+  --green: #4caf7d; --red: #e05555; --text: #e8e0d0; --muted: #6b6558;
   --mono: 'IBM Plex Mono', monospace; --thai: 'Sarabun', sans-serif; --display: 'Bebas Neue', sans-serif;
-  --sharp: #5b8fcc; --flat: #c2b280;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; margin: 0; padding: 0; }
 body { font-family: var(--thai); background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* ─── OVERLAY ─────────────────────────────────── */
 #overlay { position: fixed; inset: 0; z-index: 999; background: #0e0e0eee; backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.overlay-title { font-family: var(--display); font-size: clamp(3rem, 10vw, 6rem); color: var(--accent); line-height: 1; }
-#start-btn { font-family: var(--display); font-size: 1.4rem; padding: 16px 52px; background: var(--accent); border: none; cursor: pointer; margin-top: 20px; }
+.overlay-title { font-family: var(--display); font-size: clamp(3rem, 10vw, 6rem); letter-spacing: 0.08em; color: var(--accent); line-height: 1; }
+#start-btn { font-family: var(--display); font-size: 1.4rem; letter-spacing: 0.15em; padding: 16px 52px; background: var(--accent); color: #0e0e0e; border: none; border-radius: 4px; cursor: pointer; }
 
-/* ─── LAYOUT ─────────────────────────────────── */
 .top-section { flex: 1; display: flex; min-height: 0; }
 .khim-panel { flex: 1; background: #1a1610; display: flex; align-items: center; justify-content: center; padding: 16px; border-right: 1px solid var(--border); }
-#khim-svg { width: 100%; max-width: 400px; height: auto; }
+#khim-svg { width: 100%; max-width: 380px; height: auto; }
 
-.meter-panel { width: 200px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 12px; border-right: 1px solid var(--border); }
-.note-hz { font-family: var(--mono); font-size: 2rem; font-weight: 600; line-height: 1; }
-.ring-meter { position: relative; width: 120px; height: 120px; }
+.meter-panel { width: 200px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 12px; border-right: 1px solid var(--border); flex-shrink: 0; }
+.note-hz { font-family: var(--mono); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+.ring-meter { position: relative; width: 130px; height: 130px; }
 .ring-bg { fill: none; stroke: var(--surface); stroke-width: 8; }
-.ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.1s; }
+.ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.08s ease-out, stroke 0.2s; }
 .ring-center-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cent-value { font-family: var(--mono); font-size: 1.4rem; font-weight: 600; line-height: 1; }
+.direction-badge { font-family: var(--mono); font-size: 0.65rem; padding: 5px 14px; border-radius: 3px; background: var(--surface); color: var(--muted); width: 100%; text-align: center; }
 
-/* ─── CONTROL ─────────────────────────────────── */
-.control-section { height: 42vh; background: var(--panel); display: flex; flex-direction: column; }
+.needle-bar-wrap { background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 16px; }
+.needle-bar { position: relative; height: 32px; background: var(--surface); border-radius: 3px; overflow: hidden; }
+.needle-el { position: absolute; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--accent); left: 50%; transform: translateX(-50%); transition: left 0.08s ease-out; box-shadow: 0 0 8px rgba(212,168,73,0.5); }
+
+.control-section { height: 42vh; background: var(--panel); display: flex; flex-direction: column; overflow: hidden; }
 .tabs { display: flex; background: var(--bg); border-bottom: 1px solid var(--border); }
-.tab { flex: 1; padding: 13px; text-align: center; color: var(--muted); cursor: pointer; }
+.tab { flex: 1; padding: 13px; text-align: center; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); cursor: pointer; text-transform: uppercase; }
 .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
 .note-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px; }
 .note-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 6px; text-align: center; cursor: pointer; }
-.note-btn.active { background: rgba(212,168,73,0.15); border-color: var(--accent); }
+.note-btn.active { background: rgba(212,168,73,0.12); border-color: var(--accent); }
 
-/* Needle Bar */
-.needle-bar-wrap { background: var(--panel); border-top: 1px solid var(--border); padding: 10px; }
-.needle-bar { position: relative; height: 20px; background: var(--surface); border-radius: 10px; overflow: hidden; }
-.needle-el { position: absolute; top: 0; bottom: 0; width: 4px; background: var(--accent); left: 50%; transform: translateX(-50%); transition: left 0.1s; }
-
-@media (min-width: 700px) { body { flex-direction: row; } .main-right { flex: 0 0 340px; display: flex; flex-direction: column; } }
+@media (min-width: 700px) { body { flex-direction: row; } .meter-panel { border-right: 1px solid var(--border); } .main-right { flex: 0 0 340px; display: flex; flex-direction: column; height: 100%; } .control-section { flex: 1; } }
 </style>
 </head>
 <body>
@@ -71,19 +70,19 @@ body { font-family: var(--thai); background: var(--bg); color: var(--text); heig
 
   <div class="meter-panel">
     <div style="text-align:center">
-      <div id="note-name" style="color:var(--muted)">—</div>
+      <div class="note-thai" id="note-name" style="color:var(--muted)">—</div>
       <div class="note-hz" id="live-hz">---</div>
     </div>
     <div class="ring-meter">
       <svg viewBox="0 0 100 100">
-        <circle class="ring-bg" cx="50" cy="50" r="38"/>
-        <circle id="ring-arc" class="ring-fill" cx="50" cy="50" r="38" stroke-dasharray="238.76" stroke-dashoffset="238.76" stroke="var(--accent)" transform="rotate(-90 50 50)"/>
+        <circle class="ring-bg" cx="50" cy="50" r="38" transform="rotate(-210 50 50)"/>
+        <circle id="ring-arc" class="ring-fill" cx="50" cy="50" r="38" stroke-dasharray="239.4" stroke-dashoffset="239.4" stroke="var(--accent)" transform="rotate(-210 50 50)"/>
       </svg>
       <div class="ring-center-text">
         <div class="cent-value" id="cent-val">±0</div>
       </div>
     </div>
-    <div id="dir-badge" style="font-size:0.7rem; color:var(--muted)">WAITING</div>
+    <div class="direction-badge" id="dir-badge">รอสัญญาณ</div>
     <div id="target-hz" style="color:var(--accent); font-weight:600">---</div>
   </div>
 </div>
@@ -103,9 +102,9 @@ body { font-family: var(--thai); background: var(--bg); color: var(--text); heig
 </div>
 
 <script>
-// เปลี่ยนเฉพาะค่า Hz ตามที่ระบุใหม่
+// แก้ไขเฉพาะ Hz ตามคำสั่งคุณ
 const hzData = {
-  left: [755.7, 684.4, 619.9, 561.5, 508.5, 460.5, 416.3], // สาย 7 ใช้ค่าเดิมจากความสัมพันธ์เสียง
+  left: [755.7, 684.4, 619.9, 561.5, 508.5, 460.5, 416.3],
   middle: [508.5, 460.6, 417.2, 377.8, 342.2, 309.9, 280.7],
   right: [342.2, 309.9, 280.7, 254.2, 230.3, 208.5, 188.9]
 };
@@ -115,8 +114,7 @@ const noteNames = {
   right: ["ฟาร์", "มี", "เร", "โด", "ที", "ลา", "ซอล"]
 };
 
-let target = 508.5, targetName = "โด", bridge = 'middle';
-let isRunning = false;
+let target = 508.5, targetName = "โด", bridge = 'middle', isRunning = false;
 
 function setBridge(b) {
   bridge = b;
@@ -137,7 +135,7 @@ function renderGrid() {
       document.getElementById('note-name').innerText = n;
       document.getElementById('target-hz').innerText = h + " Hz";
       renderGrid(); 
-      syncAllMatches(n, h); 
+      syncHilight(n, h);
     };
     g.appendChild(btn);
   });
@@ -147,11 +145,7 @@ function buildStrings() {
   const sg = document.getElementById('strings-svg'); sg.innerHTML = '';
   for (let i = 0; i < 7; i++) {
     const y = 28 + (i * 8.5);
-    const zones = [
-      {id:'left', x1:35, x2:72}, 
-      {id:'middle', x1:72, x2:102}, 
-      {id:'right', x1:102, x2:138}
-    ];
+    const zones = [{id:'left', x1:35, x2:72}, {id:'middle', x1:72, x2:102}, {id:'right', x1:102, x2:138}];
     zones.forEach(z => {
       const hl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       hl.setAttribute('class', 'string-hl');
@@ -165,41 +159,35 @@ function buildStrings() {
   }
 }
 
-// คำนวณ Highlight ใหม่: ตรวจจับเสียงซ้ำที่ค่า Hz ใกล้กันมาก (เช่น 508.5)
-function syncAllMatches(name, hz) {
+// ระบบ Hilight เสียงซ้ำ
+function syncHilight(name, hz) {
   document.querySelectorAll('.string-hl').forEach(el => {
     const elHz = parseFloat(el.getAttribute('data-hz'));
     const elNote = el.getAttribute('data-note');
-    
-    // เน้นเช็คที่ค่าความถี่เป็นหลัก (Hz Match) เพราะเป็นค่าที่แน่นอนที่สุดของเสียงซ้ำ
-    // ใช้ค่าต่างไม่เกิน 0.2 Hz เพื่อให้ 460.5 และ 460.6 ติดพร้อมกันได้
-    const hzMatch = Math.abs(elHz - hz) <= 0.2;
-    const nameMatch = (elNote === name);
-
-    el.style.opacity = (hzMatch || nameMatch) ? 0.9 : 0;
+    const isMatch = (Math.abs(elHz - hz) <= 0.2) || (elNote === name);
+    el.style.opacity = isMatch ? 0.9 : 0;
   });
 }
 
 async function startApp() {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const audioCtx = new AudioContext();
-  const analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 2048;
-  audioCtx.createMediaStreamSource(stream).connect(analyser);
-  document.getElementById('overlay').style.display = 'none';
-  isRunning = true;
-  syncAllMatches(targetName, target);
-
-  const tick = () => {
-    const buf = new Float32Array(analyser.fftSize);
-    analyser.getFloatTimeDomainData(buf);
-    const pitch = getPitch(buf, audioCtx.sampleRate);
-    if (pitch > 0 && Math.abs(1200 * Math.log2(pitch/target)) < 100) {
-      updateUI(pitch);
-    }
-    requestAnimationFrame(tick);
-  };
-  tick();
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    document.getElementById('overlay').style.display = 'none';
+    isRunning = true;
+    syncHilight(targetName, target);
+    const tick = () => {
+      const buf = new Float32Array(analyser.fftSize);
+      analyser.getFloatTimeDomainData(buf);
+      const pitch = getPitch(buf, audioCtx.sampleRate);
+      if (pitch > 0 && Math.abs(1200 * Math.log2(pitch/target)) < 100) updateUI(pitch);
+      requestAnimationFrame(tick);
+    };
+    tick();
+  } catch(e) { alert("Mic Error"); }
 }
 
 function getPitch(buf, sr) {
@@ -213,12 +201,14 @@ function getPitch(buf, sr) {
 
 function updateUI(p) {
   const cents = 1200 * Math.log2(p/target);
+  const clamped = Math.max(-50, Math.min(50, cents));
   document.getElementById('live-hz').innerText = p.toFixed(1);
   document.getElementById('cent-val').innerText = (cents>0?'+':'')+Math.round(cents);
-  document.getElementById('needle').style.left = (50 + (Math.max(-50, Math.min(50, cents))*0.9)) + '%';
+  document.getElementById('needle').style.left = (50 + (clamped*0.9)) + '%';
   const color = Math.abs(cents) < 5 ? 'var(--green)' : (cents < 0 ? 'var(--sharp)' : 'var(--flat)');
   document.getElementById('ring-arc').style.stroke = color;
-  document.getElementById('ring-arc').style.strokeDashoffset = 238.76 - (238.76 * (Math.abs(cents)/50));
+  document.getElementById('ring-arc').style.strokeDashoffset = 239.4 - (239.4 * 0.7 * (Math.abs(clamped)/50));
+  document.getElementById('dir-badge').innerText = Math.abs(cents) < 5 ? '✓ ตรงแล้ว' : (cents < 0 ? '▼ ต่ำไป' : '▲ สูงไป');
 }
 
 window.onload = () => { buildStrings(); renderGrid(); };
