@@ -69,37 +69,25 @@ body { font-family: var(--thai); background: var(--bg); color: var(--text); heig
   .main-right { flex: 0 0 340px; display: flex; flex-direction: column; height: 100%; }
   .control-section { flex: 1; }
 }
-@media (max-width: 699px) {
-  .top-section { height: 38vh; }
-  .meter-panel { width: 140px; }
-  .ring-meter { width: 100px; height: 100px; }
-}
 </style>
 </head>
 <body>
 
 <div id="overlay">
   <div class="overlay-title">ขิม TUNER</div>
-  <div class="overlay-sub">Boymissu Pro · YIN Algorithm</div>
+  <div class="overlay-sub">Boymissu Pro · Global Sync Mode</div>
   <button id="start-btn">เริ่มใช้งาน</button>
-  <div id="device-tag">ตรวจจับอุปกรณ์...</div>
 </div>
 
 <div class="top-section">
   <div class="khim-panel">
     <svg id="khim-svg" viewBox="0 0 160 100">
       <path d="M25,18 L135,18 Q155,18 150,48 Q145,82 135,84 L25,84 Q15,82 10,48 Q5,18 25,18Z" fill="#3d2b1a" stroke="#221105" stroke-width="1.5"/>
-      
       <line x1="35" y1="20" x2="35" y2="82" stroke="#8b4513" stroke-width="2" opacity="0.6"/> 
       <line x1="72" y1="20" x2="72" y2="82" stroke="#b71c1c" stroke-width="2.5"/> 
       <line x1="102" y1="20" x2="102" y2="82" stroke="#b71c1c" stroke-width="2.5"/> 
       <line x1="138" y1="20" x2="138" y2="82" stroke="#8b4513" stroke-width="2" opacity="0.6"/>
-
       <g id="strings-svg"></g>
-
-      <text x="35" y="15" font-family="Sarabun" font-size="4" fill="#c2a060" text-anchor="middle" opacity="0.8">นอก</text>
-      <text x="87" y="15" font-family="Sarabun" font-size="4" fill="#c2a060" text-anchor="middle" opacity="0.8">กลาง</text>
-      <text x="138" y="15" font-family="Sarabun" font-size="4" fill="#c2a060" text-anchor="middle" opacity="0.8">ใน</text>
     </svg>
   </div>
 
@@ -137,13 +125,12 @@ body { font-family: var(--thai); background: var(--bg); color: var(--text); heig
     <div id="note-grid" class="note-grid"></div>
     <div class="status-bar">
       <div class="status-dot" id="status-dot"></div>
-      <div id="status-text" class="status-text" style="font-size:0.6rem; color:var(--muted)">กดเริ่มใช้งาน</div>
+      <div id="status-text" class="status-text" style="font-size:0.6rem; color:var(--muted)">READY</div>
     </div>
   </div>
 </div>
 
 <script>
-const CONFIG = { RMS_MOBILE: 0.018, RMS_DESKTOP: 0.010, FFT_MOBILE: 2048, FFT_DESKTOP: 4096, BUFFER: 7, IN_TUNE: 5 };
 const hzData = {
   left: [754.6, 683.4, 618.9, 560.5, 507.6, 459.7, 416.3],
   middle: [508.5, 460.5, 417.0, 377.6, 342.0, 309.7, 280.5],
@@ -155,7 +142,7 @@ const noteNames = {
   right: ["ฟาร์", "มี", "เร", "โด", "ที", "ลา", "ซอล"]
 };
 
-let audioCtx, analyser, sr, isMobile, isRunning = false;
+let audioCtx, analyser, sr, isRunning = false;
 let target = 508.5, bridge = 'middle';
 let pitchBuffer = [];
 
@@ -174,10 +161,11 @@ function renderGrid() {
     btn.className = `note-btn ${Math.abs(h - target) < 0.1 ? 'active' : ''}`;
     btn.innerHTML = `<span class="note-btn-name">${n}</span><span class="note-btn-hz">${h} Hz</span>`;
     btn.onclick = () => {
-      target = h; pitchBuffer = [];
+      target = h; 
       document.getElementById('note-name').innerText = n;
       document.getElementById('target-hz').innerText = h + ' Hz';
-      renderGrid(); highlightString(bridge, i);
+      renderGrid(); 
+      syncHilightByHz(h); // เปลี่ยนมาใช้การ Sync ด้วยความถี่แทน ID
     };
     g.appendChild(btn);
   });
@@ -187,80 +175,59 @@ function buildStrings() {
   const sg = document.getElementById('strings-svg'); sg.innerHTML = '';
   for (let i = 0; i < 7; i++) {
     const y = 28 + (i * 8.5);
-    // วาดเส้นสายหลัก (Horizontal lines)
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', '20'); line.setAttribute('y1', y);
-    line.setAttribute('x2', '150'); line.setAttribute('y2', y);
-    line.setAttribute('stroke', '#7a6040'); line.setAttribute('stroke-width', '0.4');
-    line.setAttribute('opacity', '0.5');
-    sg.appendChild(line);
-
-    // สร้าง Highlight segments (Left, Middle, Right)
     const zones = [{id:'left', x1:35, x2:72}, {id:'middle', x1:72, x2:102}, {id:'right', x1:102, x2:138}];
     zones.forEach(z => {
       const hl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      hl.setAttribute('id', `hl-${z.id}-${i}`);
-      hl.setAttribute('x', z.x1); hl.setAttribute('y', y-2);
-      hl.setAttribute('width', z.x2-z.x1); hl.setAttribute('height', 4);
+      hl.setAttribute('class', 'string-hl');
+      hl.setAttribute('data-hz', hzData[z.id][i]); // เก็บค่า Hz ไว้ที่ตัว Object เลย
+      hl.setAttribute('x', z.x1); hl.setAttribute('y', y-1.5);
+      hl.setAttribute('width', z.x2-z.x1); hl.setAttribute('height', 3);
       hl.setAttribute('fill', 'var(--accent)'); hl.setAttribute('opacity', 0);
-      hl.style.transition = 'opacity 0.2s';
       sg.appendChild(hl);
     });
   }
 }
 
-function highlightString(b, idx) {
-  document.querySelectorAll('[id^="hl-"]').forEach(el => el.style.opacity = 0);
-  const el = document.getElementById(`hl-${b}-${idx}`);
-  if (el) el.style.opacity = 0.8;
+// ฟังก์ชันใหม่: สั่งเปิดไฟทุกจุดที่มีค่า Hz ตรงกับที่เลือก
+function syncHilightByHz(hz) {
+  document.querySelectorAll('.string-hl').forEach(el => {
+    const val = parseFloat(el.getAttribute('data-hz'));
+    // ถ้าความถี่ห่างกันไม่เกิน 0.5 Hz ให้ถือว่าเป็นตัวเดียวกันและเปิดไฟ
+    el.style.opacity = Math.abs(val - hz) < 0.5 ? 0.9 : 0;
+  });
 }
 
 async function startApp() {
   try {
-    isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     sr = audioCtx.sampleRate;
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = isMobile ? CONFIG.FFT_MOBILE : CONFIG.FFT_DESKTOP;
+    analyser.fftSize = 2048;
     audioCtx.createMediaStreamSource(stream).connect(analyser);
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('status-dot').classList.add('active');
-    isRunning = true; highlightString(bridge, 0); tick();
-  } catch(e) { alert('Mic Access Denied'); }
+    isRunning = true; syncHilightByHz(target); tick();
+  } catch(e) { alert('Mic Error'); }
 }
 
 function tick() {
   if (!isRunning) return;
   const buf = new Float32Array(analyser.fftSize);
   analyser.getFloatTimeDomainData(buf);
-  const pitch = isMobile ? getPitchAMDF(buf) : getPitchYIN(buf);
+  const pitch = getPitchAMDF(buf);
   if (pitch > 0 && pitch > target * 0.5 && pitch < target * 2) {
     pitchBuffer.push(pitch);
-    if (pitchBuffer.length > CONFIG.BUFFER) pitchBuffer.shift();
-    const median = [...pitchBuffer].sort((a,b)=>a-b)[Math.floor(pitchBuffer.length/2)];
-    updateUI(median);
+    if (pitchBuffer.length > 5) pitchBuffer.shift();
+    updateUI(pitchBuffer[pitchBuffer.length-1]);
   }
   requestAnimationFrame(tick);
-}
-
-function getPitchYIN(buf) {
-  const thresh = 0.1, size = buf.length, half = size/2;
-  let rms = 0; for(let i=0; i<size; i++) rms += buf[i]*buf[i];
-  if(Math.sqrt(rms/size) < CONFIG.RMS_DESKTOP) return -1;
-  const yin = new Float32Array(half); let sum = 0; yin[0] = 1;
-  for(let t=1; t<half; t++) {
-    let d = 0; for(let i=0; i<half; i++) { let del = buf[i]-buf[i+t]; d += del*del; }
-    yin[t] = d; sum += d; yin[t] *= t/sum;
-  }
-  let tau = 2; while(tau < half) { if(yin[tau] < thresh) { while(tau+1 < half && yin[tau+1] < yin[tau]) tau++; break; } tau++; }
-  return (tau === half || yin[tau] >= thresh) ? -1 : sr / tau;
 }
 
 function getPitchAMDF(buf) {
   const size = buf.length/2;
   let rms = 0; for(let i=0; i<size; i++) rms += buf[i]*buf[i];
-  if(Math.sqrt(rms/size) < CONFIG.RMS_MOBILE) return -1;
+  if(Math.sqrt(rms/size) < 0.01) return -1;
   let minSum = Infinity, bestTau = -1;
   for(let t=Math.round(sr/1100); t<Math.round(sr/80); t++) {
     let s = 0; for(let i=0; i<size; i++) s += Math.abs(buf[i]-buf[i+t]);
@@ -276,15 +243,11 @@ function updateUI(p) {
   document.getElementById('cent-val').innerText = (cents>0?'+':'')+Math.round(cents);
   const arc = document.getElementById('ring-arc');
   arc.style.strokeDashoffset = 239.4 - (239.4 * 0.7 * (Math.abs(clamped)/50));
-  let color = 'var(--accent)', badge = 'รอสัญญาณ';
-  if(Math.abs(cents) <= CONFIG.IN_TUNE) { color = 'var(--green)'; badge = '✓ ตรงแล้ว'; }
-  else if(cents < 0) { color = 'var(--sharp)'; badge = '▼ ต่ำไป'; }
-  else { color = 'var(--flat)'; badge = '▲ สูงไป'; }
+  let color = Math.abs(cents) < 5 ? 'var(--green)' : (cents < 0 ? 'var(--sharp)' : 'var(--flat)');
   arc.style.stroke = color;
   document.getElementById('live-hz').style.color = color;
   document.getElementById('needle').style.left = (50 + (clamped*0.9)) + '%';
-  document.getElementById('dir-badge').innerText = badge;
-  document.getElementById('dir-badge').className = 'direction-badge ' + (cents < -5 ? 'flat' : cents > 5 ? 'sharp' : 'in-tune');
+  document.getElementById('dir-badge').innerText = Math.abs(cents) < 5 ? '✓ ตรงแล้ว' : (cents < 0 ? '▼ ต่ำไป' : '▲ สูงไป');
 }
 
 window.onload = () => { buildStrings(); renderGrid(); };
